@@ -210,3 +210,7 @@ def get_ngo_donors(ngo_id):
         return jsonify(donors), 200
     except Error as e:
         return jsonify({"error": str(e)}), 500
+
+
+    
+  

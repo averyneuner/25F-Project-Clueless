@@ -38,52 +38,49 @@ def create_outfit():
         db.get_db().commit()
         cursor.close()
         return (
-            jsonify({"message": "Outfit created successfully"}),
+            jsonify({"message": "Outfit created successfully", "OutfitID": new_id}),
             201,
         )
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@general.route("/outfits", methods=["GET"])
-def search_outfits():
+@general.route("/outfit/<int:aesthetic_id>", methods=["GET"])
+def search_outfits(aesthetic_id):
     try:
         cursor = db.get_db().cursor()
-        aesthetic = request.args.get('aesthetic')
-        
+        #check for existance 
+        cursor.execute("SELECT * FROM Aesthetic WHERE AestheticID = %s", (aesthetic_id,))
+        if not cursor.fetchone():
+            return jsonify({"error": "Aesthetic not found"}), 404
+        #Query 
         cursor.execute("""
              SELECT o.OutfitID, o.Nickname, o.Description, a.Name AS AestheticName
              FROM Outfit o
              JOIN OutfitMatchedAesthetic oma ON o.OutfitID = oma.OutfitID
              JOIN Aesthetic a ON oma.AestheticID = a.AestheticID
-             WHERE a.Name = %s
-        """, (aesthetic,))
+             WHERE a.AestheticID = %s
+        """, (aesthetic_id,))
         outfits = cursor.fetchall()
         cursor.close()
         return jsonify(outfits), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@general.route("/outfits", methods=["DELETE"])
-def delete_outfit():
+@general.route("/outfits/<int:outfit_id>", methods=["DELETE"])
+def delete_outfit(outfit_id):
     try:
         cursor = db.get_db().cursor()
-        closet_id = request.args.get('closet_id')
-        outfit_id = request.args.get('outfit_id')
+        #check for existances 
+        cursor.execute("SELECT * FROM CustomerClosetOutfits WHERE OutfitId = %s", (outfit_id,))
+        if not cursor.fetchone():
+            return jsonify({"error": "outfit not found"}), 404
+        #executes 
         cursor.execute("""
-            SELECT cc.NickName, o.Nickname
-            FROM CustomerClosetOutfits cco
-            JOIN CustomerCloset cc ON cco.ClosetID = cc.ClosetID
-            JOIN Outfit o ON cco.OutfitID = o.OutfitID
-            WHERE cco.ClosetID = %s AND cco.OutfitID = %s
-            LIMIT 1
-        """, (closet_id, outfit_id))
-        info = cursor.fetchone()
-        cursor.execute("""
-            DELETE FROM CustomerClosetOutfits WHERE ClosetID = %s AND OutfitID = %s
-        """, (closet_id, outfit_id))
+            DELETE FROM CustomerClosetOutfits WHERE OutfitID = %s
+        """, (outfit_id))
         db.get_db().commit()
         cursor.close()
-        return jsonify({"message": "Outfit removed", "deleted_data": info}), 200
+        return jsonify({"message": "Outfit removed", "deleted_data with id": outfit_id}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -95,10 +92,10 @@ def create_clothing_item():
         for field in required_fields:
             if field not in data:
                 return jsonify({"error": f"Missing required field: {field}"}), 400
+        cursor = db.get_db().cursor()
         cursor.execute("SELECT MAX(ItemId) FROM ClothingItem")
         res = cursor.fetchone()
         new_id = (res['MAX(ItemId)'] or 400) + 1
-        cursor = db.get_db().cursor()
         query = """
         INSERT INTO ClothingItem 
         (ItemID, ImageAddress, Name, Category, Price, Size, QualityRating, OutdatedFlag, PopularityPercentage)
@@ -119,17 +116,21 @@ def create_clothing_item():
         db.get_db().commit()
         cursor.close()
         return (
-           jsonify({"message": "Item created successfully"}),
+           jsonify({"message": "Item created successfully", "ItemID": new_id}),
             201,
         )
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-@general.route("/items", methods=["GET"])
-def search_items():
+@general.route("/items/<int:aesthetic_id>", methods=["GET"])
+def search_items(aesthetic_id):
     try:
         cursor = db.get_db().cursor()
-        aesthetic = request.args.get('aesthetic')
+        #check for existances 
+        cursor.execute("SELECT * FROM Aesthetic WHERE AestheticID = %s", (aesthetic_id,))
+        if not cursor.fetchone():
+            return jsonify({"error": "Aesthetic not found"}), 404
+        #query 
         cursor.execute("""
             SELECT ci.ItemID, ci.Name, ci.Price, ci.PopularityPercentage
             FROM CustomerCloset cc
@@ -138,11 +139,10 @@ def search_items():
             JOIN Aesthetic a ON oma.AestheticID = a.AestheticID
             JOIN ClothingItemMatchedAesthetic cima ON a.AestheticID = cima.AestheticID
             JOIN ClothingItem ci ON cima.ClothingItemID = ci.ItemID
-            WHERE a.Name = %s
+            WHERE a.AestheticID = %s
             ORDER BY ci.PopularityPercentage DESC
-        """, (aesthetic,))
+        """, (aesthetic_id,))
         items = cursor.fetchall()
-    
         cursor.close()
         return jsonify(items), 200
     except Exception as e:
@@ -153,6 +153,7 @@ def search_items():
 def get_admin_users():
     try:
         cursor = db.get_db().cursor()
+        #query (no need to check for existance here)
         cursor.execute("""
             SELECT c.CustomerID, c.FirstName, c.LastName, c.EmailAddress, 
                    COUNT(DISTINCT cc.ClosetID) AS TotalClosets
@@ -171,6 +172,7 @@ def get_admin_users():
 def get_admin_logs():
     try:
         cursor = db.get_db().cursor()
+        #query (no need to check for existance here)
         cursor.execute("""
             SELECT bn.Status AS BusinessStatus, s.IssueLogs as Issues
             FROM `System` s
@@ -183,7 +185,6 @@ def get_admin_logs():
             WHERE t.Name = 'Jenna Kim'
         """)
         tech_logs = cursor.fetchall()
-
         cursor.close()
         return jsonify({"business_logs": business_logs, "tech_logs": tech_logs}), 200
     except Exception as e:
@@ -196,6 +197,7 @@ def get_admin_logs():
 def get_trends():
     try:
         cursor = db.get_db().cursor()
+        #query (no need to check for existance here)
         cursor.execute("""
             SELECT Name, PopularityPercent, Description
             FROM Aesthetic
@@ -209,10 +211,15 @@ def get_trends():
     
 
 
-@analytics.route("/analytics/items", methods=["GET"])
-def get_item_analytics():
+@analytics.route("/analytics/items/<int:company_id>", methods=["GET"])
+def get_item_analytics(company_id):
     try:
         cursor = db.get_db().cursor()
+         #check for existances 
+        cursor.execute("SELECT * FROM Business WHERE CompanyID = %s", (company_id,))
+        if not cursor.fetchone():
+            return jsonify({"error": "business not found"}), 404
+        #query 1
         ownable = """
             SELECT b.CompanyName, c.Name, c.ImageAddress
             FROM Customer cu
@@ -222,10 +229,12 @@ def get_item_analytics():
             JOIN BusinessInventoryItemStorage biis ON c.ItemID = biis.ItemID
             JOIN BusinessInventory bi ON biis.InventoryID = bi.InventoryID
             JOIN Business b ON bi.CompanyID = b.CompanyID
+            WHERE b.CompanyId = %s
             ORDER BY c.PopularityPercentage DESC;
         """
-        cursor.execute(ownable)
+        cursor.execute(ownable, (company_id))
         most_owned = cursor.fetchall()
+        #query 2 
         wearable = """
             SELECT ci.Name as ClothingItemName
             FROM CustomerClosetClothingItems cci
@@ -233,11 +242,11 @@ def get_item_analytics():
             JOIN BusinessInventoryItemStorage bs ON ci.ItemID = bs.ItemID
             JOIN BusinessInventory bi ON bs.InventoryID = bi.InventoryID
             JOIN Business b ON bi.CompanyID = b.CompanyID
-            WHERE b.CompanyID = 01
+            WHERE b.CompanyID = %s
             GROUP BY ci.ItemID
             ORDER BY SUM(cci.NumberOfWears) DESC; 
         """
-        cursor.execute(wearable)
+        cursor.execute(wearable, (company_id))
         most_worn = cursor.fetchall() 
         cursor.close()
         return jsonify({"most_owned": most_owned, "most_worn": most_worn}), 200
@@ -248,6 +257,7 @@ def get_item_analytics():
 def get_demand_analytics():
     try:
         cursor = db.get_db().cursor()
+        #query (no need to check for existance here)
         query = """
             SELECT c.Name, COUNT(w.ItemID) as total_wishlists
             FROM ClothingItem c
@@ -293,7 +303,7 @@ def post_business_notification(business_id):
         db.get_db().commit()
         cursor.close()
         return (
-            jsonify({"message": "Notification sent successfully", "id": new_id}),
+            jsonify({"message": "Notification sent successfully", "NotificationID": new_id}),
             201,
         )
     except Exception as e:
@@ -303,6 +313,11 @@ def post_business_notification(business_id):
 def get_business_notifications(business_id):
     try:
         cursor = db.get_db().cursor()
+        #check for existance 
+        cursor.execute("SELECT * FROM Business WHERE CompanyID = %s", (business_id,))
+        if not cursor.fetchone():
+            return jsonify({"error": "business not found"}), 404
+        #query 
         cursor.execute("""
             SELECT bn.NotificationID, bn.Message, bn.Status, b.CompanyID, b.CompanyName, b.ContactEmail
             FROM BusinessNotification bn
@@ -316,15 +331,23 @@ def get_business_notifications(business_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@business.route("/business/<int:business_id>/notifications", methods=["DELETE"])
-def delete_business_notification(business_id):
+@business.route("/business/<int:business_id>/notifications/<int:notification_id>", methods=["DELETE"])
+def delete_business_notification(business_id, notification_id):
     try:
         cursor = db.get_db().cursor()
-        notif_id = request.args.get('notification_id')
+         #check for existance 
+        cursor.execute("SELECT * FROM Business WHERE CompanyID = %s", (business_id,))
+        if not cursor.fetchone():
+            return jsonify({"error": "business not found"}), 404
+         #check for existance 
+        cursor.execute("SELECT * FROM BusinessNotification WHERE NotificationId = %s", (notification_id,))
+        if not cursor.fetchone():
+            return jsonify({"error": "notification not found"}), 404
+        #query 
         cursor.execute("""
             DELETE FROM BusinessNotification 
             WHERE NotificationID = %s AND CompanyID = %s
-        """, (notif_id, business_id))
+        """, (notification_id, business_id))
         db.get_db().commit()
         cursor.close()
         return jsonify({"message": "Notification removed"}), 200
@@ -340,23 +363,26 @@ def add_business_inventory_item(business_id, inventory_id, item_id):
         for field in required_fields:
             if field not in data:
                 return jsonify({"error": f"Missing required field: {field}"}), 400
+        
         cursor = db.get_db().cursor()
+        cursor.execute("SELECT InventoryID FROM BusinessInventory WHERE CompanyID = %s AND InventoryID = %s", (business_id, inventory_id))
+        inv_row = cursor.fetchone()
+        if not inv_row: 
+            return jsonify({"error": "No inventory found for this business"}), 404
+
         cursor.execute("SELECT MAX(ItemId) FROM BusinessInventoryItemStorage")
         res = cursor.fetchone()
         bridge_id = (res['MAX(ItemId)'] or 400) + 1
-        cursor = db.get_db().cursor()
-        cursor.execute("SELECT InventoryID FROM BusinessInventory WHERE CompanyID = %s", (business_id,))
-        inv_row = cursor.fetchone()
-        if not inv_row: 
-            return jsonify({"error": "No inventory found"}), 404       
         cursor.execute("""
             INSERT INTO BusinessInventoryItemStorage 
             (ItemID, InventoryID, EthicallySourcedFlag, UnitsSold, QuantityInStock, ClothingItemID)
-            VALUES (%s, %s, TRUE, 0.0, 0.0, %s)
-        """, (bridge_id, data["EthicallySourcedFlage"], 0.0, data["QuantityInStock"], item_id))
+            VALUES (%s, %s, %s, 0, %s, %s)
+        """, (bridge_id, inventory_id, data["EthicallySourcedFlag"], data["QuantityInStock"], item_id))
         db.get_db().commit()
         cursor.close()
-        jsonify({"message": "Item added to inventory successfully", "storage_id": bridge_id}),
+        return (
+            jsonify({"message": "Item added to inventory successfully", "ItemID": bridge_id}), 201
+        )
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
@@ -366,6 +392,14 @@ def add_business_inventory_item(business_id, inventory_id, item_id):
 def get_business_inventory_item(business_id, item_id):
    try:
         cursor = db.get_db().cursor()
+         #check for existance 
+        cursor.execute("SELECT * FROM Business WHERE CompanyID = %s", (business_id,))
+        if not cursor.fetchone():
+            return jsonify({"error": "business not found"}), 404
+         #check for existance 
+        cursor.execute("SELECT * FROM ClothingItem WHERE ItemID = %s", (item_id,))
+        if not cursor.fetchone():
+            return jsonify({"error": "clothing item not found"}), 404
         cursor.execute("""
             SELECT CI.ItemID, CI.Name, CI.Category, CI.Price, BIIS.UnitsSold, BIIS.QuantityInStock
             FROM BusinessInventoryItemStorage BIIS
@@ -385,6 +419,14 @@ def get_business_inventory_item(business_id, item_id):
 def update_business_inventory_item(business_id, item_id):
     try:
         cursor = db.get_db().cursor()
+         #check for existance 
+        cursor.execute("SELECT * FROM Business WHERE CompanyID = %s", (business_id,))
+        if not cursor.fetchone():
+            return jsonify({"error": "business not found"}), 404
+         #check for existance 
+        cursor.execute("SELECT * FROM ClothingItem WHERE ItemID = %s", (item_id,))
+        if not cursor.fetchone():
+            return jsonify({"error": "clothing item not found"}), 404
         cursor.execute("""
             UPDATE BusinessInventoryItemStorage
             SET EthicallySourcedFlag = TRUE
@@ -403,6 +445,14 @@ def update_business_inventory_item(business_id, item_id):
 def delete_business_inventory_item(business_id, item_id):
     try:
         cursor = db.get_db().cursor()
+         #check for existance 
+        cursor.execute("SELECT * FROM Business WHERE CompanyID = %s", (business_id,))
+        if not cursor.fetchone():
+            return jsonify({"error": "business not found"}), 404
+         #check for existance 
+        cursor.execute("SELECT * FROM ClothingItem WHERE ItemID = %s", (item_id,))
+        if not cursor.fetchone():
+            return jsonify({"error": "clothing item not found"}), 404
         cursor.execute("""
             DELETE FROM BusinessInventoryItemStorage
             WHERE InventoryID IN (SELECT InventoryID FROM BusinessInventory WHERE CompanyID = %s)
@@ -416,33 +466,48 @@ def delete_business_inventory_item(business_id, item_id):
     
 
 @business.route("/business/<int:business_id>/wishlists/<int:wishlist_id>/item/<int:item_id>", methods=["POST"])
-def add_business_inventory_item(business_id, wishlist_id, item_id):
+def add_business_wishlist_item(business_id, wishlist_id, item_id):
     try:
         cursor = db.get_db().cursor()
+        cursor.execute("SELECT WishlistID FROM BusinessWishlist WHERE CompanyID = %s AND WishlistID = %s", (business_id, wishlist_id))
+        wish_row = cursor.fetchone()
+        if not wish_row: 
+            return jsonify({"error": "No wishlist found for this business"}), 404
+
         cursor.execute("SELECT MAX(ItemID) FROM BusinessWishlistClothingItem")
         res = cursor.fetchone()
         bridge_id = (res['MAX(ItemID)'] or 400) + 1
-        cursor = db.get_db().cursor()
-        cursor.execute("SELECT WishlistID FROM BusinessWishlist WHERE CompanyID = %s", (business_id,))
-        inv_row = cursor.fetchone()
-        if not inv_row: 
-            return jsonify({"error": "No inventory found"}), 404       
+
         cursor.execute("""
             INSERT INTO BusinessWishlistClothingItem (ItemID, WishlistID, ClothingItemID)
              VALUES (%s, %s, %s)
         """, (bridge_id, wishlist_id, item_id))
         db.get_db().commit()
         cursor.close()
-        jsonify({"message": "Item added to wishlist successfully", "storage_id": bridge_id}),
+        return (
+            jsonify({"message": "Item added to wishlist successfully", "ItemID": bridge_id}), 201
+        )
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-@business.route("/business/<int:business_id>/wishlists", methods=["DELETE"])
-def delete_business_wishlist_item(business_id):
+@business.route("/business/<int:business_id>/wishlists/<int:wishlist_id>/item/<int:item_id>", methods=["DELETE"])
+def delete_business_wishlist_item(business_id, wishlist_id, item_id):
     try:
         cursor = db.get_db().cursor()
-        item_id = request.args.get('item_id')
-        cursor.execute("DELETE FROM BusinessWishlistClothingItem WHERE ItemID = %s", (item_id,))
+        #checking for existance 
+        cursor.execute("SELECT * FROM Business WHERE CompanyID = %s", (business_id,))
+        if not cursor.fetchone():
+            return jsonify({"error": "business not found"}), 404
+         #check for existance 
+        cursor.execute("SELECT * FROM BusinessWishlist WHERE WishlistID = %s", (wishlist_id,))
+        if not cursor.fetchone():
+            return jsonify({"error": "wishlist not found"}), 404
+         #check for existance 
+        cursor.execute("SELECT * FROM ClothingItem WHERE ItemID = %s", (item_id,))
+        if not cursor.fetchone():
+            return jsonify({"error": "clothing item not found"}), 404
+        #query 
+        cursor.execute("DELETE FROM BusinessWishlistClothingItem WHERE ItemID = %s AND WishlistID = %s", (item_id, wishlist_id))
         db.get_db().commit()
         cursor.close()
         return jsonify({"message": "Item removed from wishlist"}), 200
@@ -478,7 +543,7 @@ def post_customer_notification(customer_id):
         )
         db.get_db().commit()
         cursor.close()
-        return jsonify({"message": "Notification sent successfully", "id": new_id}, 201)
+        return jsonify({"message": "Notification sent successfully", "NotificationID": new_id}, 201)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -486,6 +551,11 @@ def post_customer_notification(customer_id):
 def get_customer_notifications(customer_id):
     try:
         cursor = db.get_db().cursor()
+        #check for existance 
+        cursor.execute("SELECT * FROM Customer WHERE CustomerID = %s", (customer_id,))
+        if not cursor.fetchone():
+            return jsonify({"error": "customer not found"}), 404
+        #query 
         cursor.execute("""
             SELECT cn.NotificationID, cn.Message, cn.Status, c.CustomerID
             FROM CustomerNotification cn
@@ -503,6 +573,11 @@ def get_customer_notifications(customer_id):
 def get_customer_closet(customer_id):
     try:
         cursor = db.get_db().cursor()
+         #check for existance 
+        cursor.execute("SELECT * FROM Customer WHERE CustomerID = %s", (customer_id,))
+        if not cursor.fetchone():
+            return jsonify({"error": "customer not found"}), 404
+        #query 
         cursor.execute("""
             SELECT c.ClosetID, ci.Name AS ItemName, ci.Category, cci.NumberofWears, cci.AvailabilityStatus
             FROM CustomerCloset c
@@ -532,21 +607,20 @@ def get_customer_closet(customer_id):
 def add_closet_item(customer_id, closet_id, item_id):
     try:
         cursor = db.get_db().cursor()
+        cursor.execute("SELECT ClosetID FROM CustomerCloset WHERE CustomerID = %s AND ClosetID = %s", (customer_id, closet_id))
+        closet_row = cursor.fetchone()
+        if not closet_row: 
+            return jsonify({"error": "No closet found for this customer"}), 404
         cursor.execute("SELECT MAX(ItemId) FROM CustomerClosetClothingItems")
         res = cursor.fetchone()
         bridge_id = (res['MAX(ItemId)'] or 400) + 1
-        cursor = db.get_db().cursor()
-        cursor.execute("SELECT ClosetID FROM CustomerCloset WHERE CustomerID = %s", (customer_id,))
-        inv_row = cursor.fetchone()
-        if not inv_row: 
-            return jsonify({"error": "No closet found"}), 404     
         cursor.execute("""
-            INSERT INTO CustomerClosetClothingItems (ClothingItemID, ClothingItemID, ClosetID, NumberofWears, AvailabilityStatus)
+            INSERT INTO CustomerClosetClothingItems (ItemID, ClothingItemID, ClosetID, NumberofWears, AvailabilityStatus)
             VALUES (%s, %s, %s, 0, TRUE)
         """, (bridge_id, item_id, closet_id))
         db.get_db().commit()
         cursor.close()
-        return jsonify({"message": "Item added to closet successfully", "storage_id": bridge_id}),201, 
+        return jsonify({"message": "Item added to closet successfully", "ItemID": bridge_id}),201, 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -554,21 +628,20 @@ def add_closet_item(customer_id, closet_id, item_id):
 def add_closet_outfit(customer_id, outfit_id, closet_id):
     try:
         cursor = db.get_db().cursor()
+        cursor.execute("SELECT ClosetID FROM CustomerCloset WHERE CustomerID = %s AND ClosetID = %s", (customer_id, closet_id))
+        closet_row = cursor.fetchone()
+        if not closet_row: 
+            return jsonify({"error": "No closet found for this customer"}), 404
         cursor.execute("SELECT MAX(OutfitID) FROM CustomerClosetOutfits")
         res = cursor.fetchone()
         bridge_id = (res['MAX(OutfitID)'] or 400) + 1
-        cursor = db.get_db().cursor()
-        cursor.execute("SELECT ClosetID FROM CustomerCloset WHERE CustomerID = %s", (customer_id,))
-        inv_row = cursor.fetchone()
-        if not inv_row: 
-            return jsonify({"error": "No closet found"}), 404     
         cursor.execute("""
             INSERT INTO CustomerClosetOutfits (ClosetID, OutfitID)
             VALUES (%s, %s)
         """, (closet_id, outfit_id))
         db.get_db().commit()
         cursor.close()
-        return jsonify({"message": "Outfit added to closet successfully", "storage_id": bridge_id}),201, 
+        return jsonify({"message": "Outfit added to closet successfully", "OutfitID": bridge_id}),201, 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -576,6 +649,11 @@ def add_closet_outfit(customer_id, outfit_id, closet_id):
 def get_customer_wishlist(customer_id):
     try:
         cursor = db.get_db().cursor()
+         #check for existance 
+        cursor.execute("SELECT * FROM Customer WHERE CustomerID = %s", (customer_id,))
+        if not cursor.fetchone():
+            return jsonify({"error": "customer not found"}), 404
+        #query 
         cursor.execute("""
             SELECT cw.WishlistID, ci.Name, ci.Price, ci.ImageAddress
             FROM CustomerWishlist cw
@@ -624,12 +702,7 @@ def add_customer_wishlist_item(customer_id, wishlist_id, item_id):
         """, (bridge_id, wishlist_id, item_id))
        db.get_db().commit()
        cursor.close()
-       return jsonify({"message": "Item added to wishlist successfully", "storage_id": bridge_id}),201, 
+       return jsonify({"message": "Item added to wishlist successfully", "ItemID": bridge_id}),201, 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-
-
-
-
-
