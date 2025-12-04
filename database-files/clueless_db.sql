@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS Customer (
     ZIP VARCHAR(10),
     Country VARCHAR(50)
 );
-˝
+
 DROP TABLE IF EXISTS Business;
 CREATE TABLE IF NOT EXISTS Business (
 	CompanyID INT PRIMARY KEY,
@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS ClothingItem (
 	ImageAddress VARCHAR(50),
 	Name VARCHAR(50),
 	Category VARCHAR(50),
-	Price DECIMAL(4,2),
+	Price DECIMAL(7,2),
 	Size VARCHAR(50),
 	QualityRating INT,
     OutdatedFlag BOOLEAN,
@@ -447,6 +447,17 @@ INSERT INTO BusinessInventory (InventoryID, Title, CompanyID) VALUES
 (655, 'Furniture', 28), (656, 'Garden', 29);
 
 USE Clueless;
+
+-- Adding Outfits to the table that will work with the CustomerOutfitsOfClothingItems
+INSERT INTO Outfit (OutfitID, Nickname, Description) VALUES
+(701, 'Streetwear', 'Layered streetwear outfit with bomber jacket and combat boots'),
+(702, 'Running', 'Leggings, crop top, and sneakers for gym or errands'),
+(703, 'Night Out', 'Corset top with mini skirt and knee-high boots'),
+(704, 'Office Attire', 'Blazer, tailored pants, and structured bag'),
+(705, 'Festival Attire', 'Maxi skirt, crop top, and layered accessories'),
+(706, '2000s', 'Flannel shirt, distressed jeans, and boots'),
+(707, 'Winter Clothes', 'Chunky knit sweater, trench coat, scarf, and gloves'),
+(708, 'Costume Party', 'Velour tracksuit, platform shoes, and baguette bag');
 
 -- Bridge: CustomerOutfitsOfClothingItems
 -- Linking the new items (820+) to new outfits or existing ones. 
