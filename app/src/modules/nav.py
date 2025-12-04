@@ -20,20 +20,16 @@ def ConsumerHomeNav():
         "pages/00_Consumer_Home.py", label="Consumer Home", icon="🏠"
     )
 
-
 def ConsumerWishlistNav():
     st.sidebar.page_link(
         "pages/00_Consumer_Wishlist.py", label="My Wishlist", icon="💜"
     )
 
-
 def ConsumerClosetNav():
     st.sidebar.page_link("pages/00_Consumer_Closet.py", label="My Closet", icon="👔")
 
-
 def ConsumerProfileNav():
     st.sidebar.page_link("pages/00_Consumer_Profile.py", label="Profile", icon="👤")
-
 
 ## ------------------------ Examples for Role of usaid_worker ------------------------
 
