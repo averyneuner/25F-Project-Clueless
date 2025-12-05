@@ -34,7 +34,7 @@ df = pd.DataFrame({
 })
 chart = (
     alt.Chart(df)
-    .mark_bar(color="#4A74F5")
+    .mark_bar(color="#A78BFA")
     .encode(
         x=alt.X("Date", sort=["Su", "M", "T", "W", "Th", "F", "S"]),
         y="Users"
@@ -48,7 +48,7 @@ df = pd.DataFrame({
 })
 chart = (
     alt.Chart(df)
-    .mark_bar(color="#4A74F5")
+    .mark_bar(color="#A78BFA")
     .encode(
         x=alt.X("Date", sort=["Su", "M", "T", "W", "Th", "F", "S"]),
         y="Businesses"
@@ -62,7 +62,7 @@ df = pd.DataFrame({
 })
 chart = (
     alt.Chart(df)
-    .mark_bar(color="#4A74F5")
+    .mark_bar(color="#A78BFA")
     .encode(
         x=alt.X("Date", sort=["Su", "M", "T", "W", "Th", "F", "S"]),
         y="Daily Outfit Uploads"
@@ -76,7 +76,7 @@ df = pd.DataFrame({
 })
 chart = (
     alt.Chart(df)
-    .mark_bar(color="#4A74F5")
+    .mark_bar(color="#A78BFA")
     .encode(
         x=alt.X("Date", sort=["Su", "M", "T", "W", "Th", "F", "S"]),
         y="Wishlist Conversions"
