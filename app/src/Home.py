@@ -81,7 +81,7 @@ if st.button('Act as Rebecca, an Business Owner',
     st.session_state['authenticated'] = True
     st.session_state['role'] = 'business_owner'
     st.session_state['first_name'] = 'Rebecca'
-    st.switch_page('pages/31_Business_Home.py')
+    st.switch_page('pages/36_Business_Home.py')
 
 
 
