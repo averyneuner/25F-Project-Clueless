@@ -9,224 +9,484 @@ logger = logging.getLogger(__name__)
 st.set_page_config(layout='wide')
 SideBarLinks()
 
+
 API_BASE_URL = "http://web-api:4000"
 
-# =============================================================================
-# Session State
-# =============================================================================
+def get_customer_notifications(customer_id):
+    """
+    Calls: GET /c/customer/<customer_id>/notifications
+    Backend route: @customer.route("/customer/<int:customer_id>/notifications", methods=["GET"])
+    """
+    try:
+        response = requests.get(
+            f"{API_BASE_URL}/c/customer/{customer_id}/notifications",
+            timeout=10
+        )
+        if response.status_code == 200:
+            return True, response.json()
+        return False, f"HTTP {response.status_code}: {response.text}"
+    except requests.exceptions.ConnectionError:
+        return False, "Cannot connect to API server"
+    except requests.exceptions.RequestException as e:
+        return False, str(e)
+
+
+def get_business_notifications(business_id):
+    """
+    Calls: GET /b/business/<business_id>/notifications
+    Backend route: @business.route("/business/<int:business_id>/notifications", methods=["GET"])
+    """
+    try:
+        response = requests.get(
+            f"{API_BASE_URL}/b/business/{business_id}/notifications",
+            timeout=10
+        )
+        if response.status_code == 200:
+            return True, response.json()
+        return False, f"HTTP {response.status_code}: {response.text}"
+    except requests.exceptions.RequestException as e:
+        return False, str(e)
+
+
+def send_customer_notification(customer_id, message):
+    """
+    Calls: POST /c/customer/<customer_id>/notifications
+    Backend route: @customer.route("/customer/<int:customer_id>/notifications", methods=["POST"])
+    """
+    try:
+        response = requests.post(
+            f"{API_BASE_URL}/c/customer/{customer_id}/notifications",
+            json={
+                "message": message,
+                "status": "Unread"
+            },
+            timeout=10
+        )
+        if response.status_code in [200, 201]:
+            return True, response.json()
+        return False, f"HTTP {response.status_code}: {response.text}"
+    except requests.exceptions.RequestException as e:
+        return False, str(e)
+
+
+def send_business_notification(business_id, message):
+    """
+    Calls: POST /b/business/<business_id>/notifications
+    Backend route: @business.route("/business/<int:business_id>/notifications", methods=["POST"])
+    """
+    try:
+        response = requests.post(
+            f"{API_BASE_URL}/b/business/{business_id}/notifications",
+            json={
+                "message": message,
+                "status": "Unread"
+            },
+            timeout=10
+        )
+        if response.status_code in [200, 201]:
+            return True, response.json()
+        return False, f"HTTP {response.status_code}: {response.text}"
+    except requests.exceptions.RequestException as e:
+        return False, str(e)
+
+
+def delete_business_notification(business_id, notification_id):
+    """
+    Calls: DELETE /b/business/<business_id>/notifications/<notification_id>
+    Backend route: @business.route("/business/<int:business_id>/notifications/<int:notification_id>", methods=["DELETE"])
+    """
+    try:
+        response = requests.delete(
+            f"{API_BASE_URL}/b/business/{business_id}/notifications/{notification_id}",
+            timeout=10
+        )
+        if response.status_code == 200:
+            return True, response.json()
+        return False, f"HTTP {response.status_code}: {response.text}"
+    except requests.exceptions.RequestException as e:
+        return False, str(e)
+
+
+def get_admin_users():
+    """
+    Calls: GET /g/admin/users
+    Used to populate receiver dropdown with customer list
+    """
+    try:
+        response = requests.get(f"{API_BASE_URL}/g/admin/users", timeout=10)
+        if response.status_code == 200:
+            return True, response.json()
+        return False, f"HTTP {response.status_code}"
+    except requests.exceptions.RequestException as e:
+        return False, str(e)
+
+
+
 
 if 'notif_view' not in st.session_state:
-    st.session_state.notif_view = 'landing'  # 'landing', 'view', 'detail'
+    st.session_state.notif_view = 'landing'
 
 if 'selected_notif' not in st.session_state:
     st.session_state.selected_notif = None
 
-if 'notifications' not in st.session_state:
-    st.session_state.notifications = [
-        {
-            'id': 1,
-            'type': 'System notifications',
-            'message': 'API sync failed with Zara.',
-            'full_message': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. The API connection to Zara inventory system failed at 3:42 PM. Please check the server logs for more details.',
-            'read': False,
-            'timestamp': datetime.now()
-        },
-        {
-            'id': 2,
-            'type': 'User alert',
-            'message': '5 new flagged uploads.',
-            'full_message': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Five user uploads have been flagged for review. Items include potentially inappropriate content or copyright violations. Please review these items in the moderation queue.',
-            'read': False,
-            'timestamp': datetime.now()
-        },
-        {
-            'id': 3,
-            'type': 'User comments',
-            'message': 'I cannot upload new clothes...',
-            'full_message': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. User reported: "I cannot upload new clothes to my closet. Every time I try, the app crashes. I have tried reinstalling but the issue persists. Please help!"',
-            'read': False,
-            'timestamp': datetime.now()
-        },
-        {
-            'id': 4,
-            'type': 'User comments',
-            'message': 'I cannot sign into the app...',
-            'full_message': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. User reported: "I cannot sign into the app since the last update. It keeps saying invalid credentials even though I am using the correct password. I have reset my password twice already."',
-            'read': False,
-            'timestamp': datetime.now()
-        }
-    ]
+if 'selected_customer_id' not in st.session_state:
+    st.session_state.selected_customer_id = 10
 
-# =============================================================================
-# Helper Functions
-# =============================================================================
+if 'selected_business_id' not in st.session_state:
+    st.session_state.selected_business_id = 10
 
-def count_by_type(notif_type):
-    return sum(1 for n in st.session_state.notifications if n['type'] == notif_type and not n['read'])
 
-def mark_all_read():
-    for n in st.session_state.notifications:
-        n['read'] = True
+
+def count_unread(notifications):
+    """Count unread notifications from a list"""
+    if not notifications:
+        return 0
+    return sum(1 for n in notifications if n.get('Status') == 'Unread')
 
 def back_button(target='landing'):
+    """Render a back button that changes view state"""
     if st.button("← Back"):
         st.session_state.notif_view = target
         st.session_state.selected_notif = None
         st.rerun()
 
-# =============================================================================
-# Page UI
-# =============================================================================
 
-# =============================================================================
-# LANDING VIEW
-# =============================================================================
+success_users, users_data = get_admin_users()
+
+
+success_cust_notif, customer_notifications = get_customer_notifications(
+    st.session_state.selected_customer_id
+)
+
+
+success_biz_notif, business_notifications = get_business_notifications(
+    st.session_state.selected_business_id
+)
+
+
 if st.session_state.notif_view == 'landing':
-    st.title('Notifications & Alerts Page')
+    st.title('🔔 Notifications & Alerts Page')
     
-    st.markdown("### Alerts ⚠️")
+    with st.sidebar:
+        st.subheader("🔌 API Status")
+        if success_cust_notif:
+            st.success("✅ Connected")
+        else:
+            st.error("❌ Disconnected")
+        
+        st.divider()
+        
+        st.subheader("👤 Select Customer")
+        if success_users and users_data:
+            customer_options = {
+                f"{u['FirstName']} {u['LastName']} (ID: {u['CustomerID']})": u['CustomerID']
+                for u in users_data
+            }
+            selected = st.selectbox(
+                "Customer",
+                options=list(customer_options.keys()),
+                label_visibility="collapsed"
+            )
+            st.session_state.selected_customer_id = customer_options[selected]
+        else:
+            st.session_state.selected_customer_id = st.number_input(
+                "Customer ID", 
+                min_value=1, 
+                value=10
+            )
+        
+        st.subheader("🏢 Select Business")
+        st.session_state.selected_business_id = st.number_input(
+            "Business ID",
+            min_value=1,
+            value=10,
+            label_visibility="collapsed"
+        )
     
-    for notif_type in ['System notifications', 'User alert', 'User comments']:
-        col1, col2 = st.columns([4, 1])
-        with col1:
-            st.write(f"{notif_type}:")
-        with col2:
-            count = count_by_type(notif_type)
-            if count > 0:
-                st.markdown(f"<span style='background-color:#EF4444;color:white;padding:2px 10px;border-radius:50%;font-size:14px;'>{count}</span>", unsafe_allow_html=True)
+
+    st.markdown("### ⚠️ Alerts Summary")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        cust_unread = count_unread(customer_notifications) if success_cust_notif else 0
+        st.metric("Customer Notifications", cust_unread, help="Unread customer notifications")
+    
+    with col2:
+        biz_unread = count_unread(business_notifications) if success_biz_notif else 0
+        st.metric("Business Notifications", biz_unread, help="Unread business notifications")
+    
+    with col3:
+        total_unread = cust_unread + biz_unread
+        st.metric("Total Unread", total_unread)
     
     st.write("")
     
-    if st.button("🔔 View Notifications & Alerts →", use_container_width=True):
+
+    if st.button("🔔 View All Notifications & Alerts →", use_container_width=True, type="primary"):
         st.session_state.notif_view = 'view'
         st.rerun()
     
     st.divider()
     
-    st.subheader('Issue Notifications')
+
+    st.subheader('📤 Send New Notification')
     
+
+    notif_type = st.radio(
+        "Send to:",
+        ["Customer", "Business"],
+        horizontal=True
+    )
+    
+
     st.write("**Receiver**")
-    receiver = st.text_input("Receiver", placeholder="Please enter receiver's name", label_visibility="collapsed")
+    if notif_type == "Customer":
+        if success_users and users_data:
+            receiver_options = {
+                f"{u['FirstName']} {u['LastName']} ({u['EmailAddress']})": u['CustomerID']
+                for u in users_data
+            }
+            selected_receiver = st.selectbox(
+                "Select Customer",
+                options=list(receiver_options.keys()),
+                label_visibility="collapsed"
+            )
+            receiver_id = receiver_options[selected_receiver]
+        else:
+            receiver_id = st.number_input("Customer ID", min_value=1, value=10, label_visibility="collapsed")
+    else:
+        receiver_id = st.number_input("Business ID", min_value=1, value=10, label_visibility="collapsed")
     
-    st.write("")
-    message = st.text_area("Message", placeholder="Type here...", max_chars=200, label_visibility="collapsed", height=150)
+
+    st.write("**Message**")
+    message = st.text_area(
+        "Message",
+        placeholder="Type your notification message here...",
+        max_chars=200,
+        label_visibility="collapsed",
+        height=150
+    )
     st.caption(f"{len(message)}/200 characters")
     
     st.write("")
     
-    if st.button("Send", use_container_width=True, type="primary", disabled=not receiver or not message):
-        st.session_state.notifications.append({
-            'id': len(st.session_state.notifications) + 1,
-            'type': 'System notifications',
-            'message': f"Sent to {receiver}: {message[:30]}...",
-            'full_message': f"Message sent to {receiver}: {message}",
-            'read': False,
-            'timestamp': datetime.now()
-        })
-        st.success(f"Notification sent to {receiver}!")
-        st.rerun()
 
-# =============================================================================
-# VIEW PAGE - List of Notifications
-# =============================================================================
+    send_disabled = not message or len(message.strip()) == 0
+    
+    if st.button("📨 Send Notification", use_container_width=True, type="primary", disabled=send_disabled):
+        if notif_type == "Customer":
+            success, result = send_customer_notification(receiver_id, message)
+        else:
+            success, result = send_business_notification(receiver_id, message)
+        
+        if success:
+            st.success(f"✅ Notification sent successfully! ID: {result.get('NotificationID', 'N/A')}")
+            st.balloons()
+            st.rerun()
+        else:
+            st.error(f"❌ Failed to send: {result}")
+
+
 elif st.session_state.notif_view == 'view':
     back_button('landing')
-    st.title('View Notifications & Alerts')
+    st.title('📋 View Notifications & Alerts')
     
-    unread = [n for n in st.session_state.notifications if not n['read']]
-    read = [n for n in st.session_state.notifications if n['read']]
-    
-    # Unread Section
-    st.subheader(f"🔴 Unread ({len(unread)})")
-    
-    if unread:
-        for notif in unread:
-            with st.container(border=True):
-                col1, col2, col3 = st.columns([0.5, 1, 8])
-                with col1:
-                    st.markdown("🔴")
-                with col2:
-                    st.markdown("✉️")
-                with col3:
-                    st.markdown(f"**{notif['type']}**")
-                    st.write(notif['message'])
-                
-                if st.button("View Details →", key=f"view_{notif['id']}", use_container_width=True):
-                    st.session_state.selected_notif = notif
-                    st.session_state.notif_view = 'detail'
-                    st.rerun()
-    else:
-        st.info("No unread notifications")
-    
-    st.divider()
-    
-    # Read Section
-    st.subheader(f"✅ Read ({len(read)})")
-    
-    if read:
-        for notif in read:
-            with st.container(border=True):
-                col1, col2, col3 = st.columns([0.5, 1, 8])
-                with col1:
-                    st.markdown("⚪")
-                with col2:
-                    st.markdown("✉️")
-                with col3:
-                    st.markdown(f"**{notif['type']}**")
-                    st.write(notif['message'])
-                
-                if st.button("View Details →", key=f"view_read_{notif['id']}", use_container_width=True):
-                    st.session_state.selected_notif = notif
-                    st.session_state.notif_view = 'detail'
-                    st.rerun()
-    else:
-        st.info("No read notifications")
 
-# =============================================================================
-# DETAIL VIEW - Single Notification
-# =============================================================================
+    tab1, tab2 = st.tabs(["👤 Customer Notifications", "🏢 Business Notifications"])
+    
+
+    with tab1:
+        if success_cust_notif and customer_notifications:
+            # Separate unread and read
+            unread = [n for n in customer_notifications if n.get('Status') == 'Unread']
+            read = [n for n in customer_notifications if n.get('Status') != 'Unread']
+            
+            # Unread Section
+            st.subheader(f"🔴 Unread ({len(unread)})")
+            
+            if unread:
+                for notif in unread:
+                    with st.container(border=True):
+                        col1, col2, col3 = st.columns([0.5, 8, 2])
+                        with col1:
+                            st.markdown("🔴")
+                        with col2:
+                            st.markdown(f"**Notification #{notif.get('NotificationID', 'N/A')}**")
+                            st.write(notif.get('Message', 'No message'))
+                        with col3:
+                            if st.button("View →", key=f"view_cust_{notif['NotificationID']}", use_container_width=True):
+                                st.session_state.selected_notif = {
+                                    **notif,
+                                    'type': 'customer',
+                                    'timestamp': datetime.now()
+                                }
+                                st.session_state.notif_view = 'detail'
+                                st.rerun()
+            else:
+                st.info("🎉 No unread notifications!")
+            
+            st.divider()
+            
+            # Read Section
+            st.subheader(f"✅ Read ({len(read)})")
+            
+            if read:
+                for notif in read:
+                    with st.container(border=True):
+                        col1, col2, col3 = st.columns([0.5, 8, 2])
+                        with col1:
+                            st.markdown("⚪")
+                        with col2:
+                            st.markdown(f"**Notification #{notif.get('NotificationID', 'N/A')}**")
+                            st.write(notif.get('Message', 'No message'))
+                        with col3:
+                            if st.button("View →", key=f"view_cust_read_{notif['NotificationID']}", use_container_width=True):
+                                st.session_state.selected_notif = {
+                                    **notif,
+                                    'type': 'customer',
+                                    'timestamp': datetime.now()
+                                }
+                                st.session_state.notif_view = 'detail'
+                                st.rerun()
+            else:
+                st.info("No read notifications")
+        else:
+            st.warning(f"Could not load customer notifications: {customer_notifications}")
+    
+
+    with tab2:
+        if success_biz_notif and business_notifications:
+            # Separate unread and read
+            unread = [n for n in business_notifications if n.get('Status') == 'Unread']
+            read = [n for n in business_notifications if n.get('Status') != 'Unread']
+            
+            # Unread Section
+            st.subheader(f"🔴 Unread ({len(unread)})")
+            
+            if unread:
+                for notif in unread:
+                    with st.container(border=True):
+                        col1, col2, col3 = st.columns([0.5, 8, 2])
+                        with col1:
+                            st.markdown("🔴")
+                        with col2:
+                            st.markdown(f"**{notif.get('CompanyName', 'Unknown Company')}**")
+                            st.write(notif.get('Message', 'No message'))
+                        with col3:
+                            if st.button("View →", key=f"view_biz_{notif['NotificationID']}", use_container_width=True):
+                                st.session_state.selected_notif = {
+                                    **notif,
+                                    'type': 'business',
+                                    'timestamp': datetime.now()
+                                }
+                                st.session_state.notif_view = 'detail'
+                                st.rerun()
+            else:
+                st.info("🎉 No unread business notifications!")
+            
+            st.divider()
+            
+            # Read Section
+            st.subheader(f"✅ Read ({len(read)})")
+            
+            if read:
+                for notif in read:
+                    with st.container(border=True):
+                        col1, col2, col3 = st.columns([0.5, 8, 2])
+                        with col1:
+                            st.markdown("⚪")
+                        with col2:
+                            st.markdown(f"**{notif.get('CompanyName', 'Unknown Company')}**")
+                            st.write(notif.get('Message', 'No message'))
+                        with col3:
+                            if st.button("View →", key=f"view_biz_read_{notif['NotificationID']}", use_container_width=True):
+                                st.session_state.selected_notif = {
+                                    **notif,
+                                    'type': 'business',
+                                    'timestamp': datetime.now()
+                                }
+                                st.session_state.notif_view = 'detail'
+                                st.rerun()
+            else:
+                st.info("No read business notifications")
+        else:
+            st.warning(f"Could not load business notifications: {business_notifications}")
+
+
 elif st.session_state.notif_view == 'detail':
     back_button('view')
     
     notif = st.session_state.selected_notif
     
     if notif:
-        st.title(notif['type'])
+        notif_type = notif.get('type', 'customer')
+        type_icon = "👤" if notif_type == 'customer' else "🏢"
+        st.title(f"{type_icon} Notification Details")
         
-        st.markdown(f"**Subject:** {notif['message']}")
-        st.caption(f"Received: {notif['timestamp'].strftime('%B %d, %Y at %I:%M %p')}")
+
+        with st.container(border=True):
+            st.markdown(f"**Notification ID:** #{notif.get('NotificationID', 'N/A')}")
+            st.markdown(f"**Status:** {notif.get('Status', 'Unknown')}")
+            
+            if notif_type == 'business':
+                st.markdown(f"**Company:** {notif.get('CompanyName', 'N/A')}")
+                st.markdown(f"**Contact:** {notif.get('ContactEmail', 'N/A')}")
+            else:
+                st.markdown(f"**Customer ID:** {notif.get('CustomerID', 'N/A')}")
+            
+            timestamp = notif.get('timestamp', datetime.now())
+            st.caption(f"Viewed: {timestamp.strftime('%B %d, %Y at %I:%M %p')}")
         
         st.divider()
         
-        st.write(notif.get('full_message', notif['message']))
+
+        st.subheader("📝 Message")
+        st.write(notif.get('Message', 'No message content'))
         
         st.divider()
+        
+
+        st.subheader("⚡ Actions")
         
         col1, col2 = st.columns(2)
+        
         with col1:
-            if notif['read']:
-                if st.button("🔴 Mark as Unread", use_container_width=True, type="primary"):
-                    for n in st.session_state.notifications:
-                        if n['id'] == notif['id']:
-                            n['read'] = False
-                    st.success("Marked as unread!")
-                    st.session_state.notif_view = 'view'
-                    st.rerun()
+            current_status = notif.get('Status', 'Unread')
+            if current_status == 'Read':
+                btn_label = "🔴 Mark as Unread"
+                new_status = "Unread"
             else:
-                if st.button("✅ Mark as Read", use_container_width=True, type="primary"):
-                    for n in st.session_state.notifications:
-                        if n['id'] == notif['id']:
-                            n['read'] = True
-                    st.success("Marked as read!")
-                    st.session_state.notif_view = 'view'
-                    st.rerun()
-        with col2:
-            if st.button("🗑️ Delete", use_container_width=True):
-                st.session_state.notifications = [n for n in st.session_state.notifications if n['id'] != notif['id']]
-                st.success("Notification deleted!")
+                btn_label = "✅ Mark as Read"
+                new_status = "Read"
+            
+            if st.button(btn_label, use_container_width=True, type="primary"):
+
+                st.success(f"Marked as {new_status}!")
                 st.session_state.notif_view = 'view'
                 st.rerun()
+        
+        with col2:
+            if st.button("🗑️ Delete Notification", use_container_width=True):
+                if notif_type == 'business':
+                    company_id = notif.get('CompanyID', st.session_state.selected_business_id)
+                    success, result = delete_business_notification(
+                        company_id,
+                        notif['NotificationID']
+                    )
+                    if success:
+                        st.success("✅ Notification deleted!")
+                        st.session_state.notif_view = 'view'
+                        st.rerun()
+                    else:
+                        st.error(f"❌ Failed to delete: {result}")
+                else:
+                    st.warning("⚠️ Customer notification deletion not implemented in backend")
     else:
-        st.error("Notification not found")
-        st.session_state.notif_view = 'view'
-        st.rerun()
+        st.error("❌ Notification not found")
+        if st.button("← Back to List"):
+            st.session_state.notif_view = 'view'
+            st.rerun()
+
+st.divider()
+st.caption("💡 Select a customer/business in the sidebar to view their notifications.")

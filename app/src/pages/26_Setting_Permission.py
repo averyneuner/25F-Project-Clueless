@@ -10,9 +10,7 @@ SideBarLinks()
 
 API_BASE_URL = "http://web-api:4000"
 
-# =============================================================================
-# Session State
-# =============================================================================
+
 
 if 'admins' not in st.session_state:
     st.session_state.admins = [
@@ -29,17 +27,13 @@ if 'usage_violations' not in st.session_state:
         {'name': 'Janet Chen', 'user_id': 'JC1234', 'reason': 'Password Violation'}
     ]
 
-# =============================================================================
-# Page UI
-# =============================================================================
+
 
 st.title('Settings & Permissions Page')
 
 tab1, tab2 = st.tabs(["Admin Management", "Remove Usage Access"])
 
-# =============================================================================
-# TAB 1: Admin Management
-# =============================================================================
+
 with tab1:
     st.write("")
     
@@ -131,9 +125,7 @@ with tab1:
         if not found:
             st.warning("Admin not found")
 
-# =============================================================================
-# TAB 2: Remove Usage Access
-# =============================================================================
+
 with tab2:
     st.write("")
     

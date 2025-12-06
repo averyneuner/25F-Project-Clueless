@@ -5,9 +5,6 @@ from modules.nav import SideBarLinks
 st.set_page_config(layout='wide')
 SideBarLinks()
 
-# =============================================================================
-# Session State
-# =============================================================================
 
 if 'view' not in st.session_state:
     st.session_state.view = 'main'
@@ -24,7 +21,7 @@ if 'mapping_suggestions' not in st.session_state:
 if 'mapping_history' not in st.session_state:
     st.session_state.mapping_history = []
 
-# Sample data for top wishlisted
+
 TOP_WISHLISTED = [
     {'Name': 'High Waisted Leggings', 'total_wishlists': 45},
     {'Name': 'Combat Boots', 'total_wishlists': 38},
@@ -33,9 +30,7 @@ TOP_WISHLISTED = [
     {'Name': 'High Top Sneakers', 'total_wishlists': 25},
 ]
 
-# =============================================================================
-# Views
-# =============================================================================
+
 
 def back_button():
     if st.button("← Back"):

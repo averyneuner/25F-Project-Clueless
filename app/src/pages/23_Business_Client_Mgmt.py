@@ -10,29 +10,23 @@ SideBarLinks()
 
 API_BASE_URL = "http://web-api:4000"
 
-# =============================================================================
-# Session State Initialization
-# =============================================================================
 
 if 'view_mode' not in st.session_state:
-    st.session_state.view_mode = 'list'  # 'list', 'profile', 'add'
+    st.session_state.view_mode = 'list'
 
 if 'selected_client' not in st.session_state:
     st.session_state.selected_client = None
 
-# Reset selected client if it has old keys
 if st.session_state.selected_client is not None:
     if 'company_id' not in st.session_state.selected_client:
         st.session_state.selected_client = None
         st.session_state.view_mode = 'list'
 
-# Reset business_clients to use new schema (force refresh)
 if 'business_clients' in st.session_state:
-    # Check if using old schema
     if st.session_state.business_clients and 'company_id' not in st.session_state.business_clients[0]:
         del st.session_state['business_clients']
 
-# Sample business clients matching database schema
+
 if 'business_clients' not in st.session_state:
     st.session_state.business_clients = [
         {
@@ -70,24 +64,17 @@ if 'business_clients' not in st.session_state:
         }
     ]
 
-# =============================================================================
-# Page UI
-# =============================================================================
 
-# Back button for sub-views
 if st.session_state.view_mode != 'list':
     if st.button("← Back"):
         st.session_state.view_mode = 'list'
         st.session_state.selected_client = None
         st.rerun()
 
-# =============================================================================
-# LIST VIEW - Business Client Management
-# =============================================================================
+
 if st.session_state.view_mode == 'list':
     st.title('Business Client Management')
     
-    # Search bar with filter
     col1, col2 = st.columns([5, 1])
     with col1:
         search = st.text_input("Search", placeholder="🔍 Search", label_visibility="collapsed")
@@ -96,15 +83,12 @@ if st.session_state.view_mode == 'list':
     
     st.divider()
     
-    # Business Client Cards
     st.subheader("Business Client")
     
     for client in st.session_state.business_clients:
-        # Skip clients with old schema
         if 'company_id' not in client:
             continue
             
-        # Filter by search
         if search and search.lower() not in client.get('company_name', '').lower():
             continue
             
@@ -121,15 +105,13 @@ if st.session_state.view_mode == 'list':
             st.write("**Contact Name**")
             st.write(client.get('contact_name', 'N/A'))
             
-            # View Profile Button
             if st.button(f"Business Client Profile →", key=f"profile_{client.get('company_id')}", use_container_width=True):
                 st.session_state.selected_client = client
                 st.session_state.view_mode = 'profile'
                 st.rerun()
             
             st.divider()
-    
-    # Action Buttons
+
     col1, col2 = st.columns(2)
     with col1:
         if st.button("Edit", use_container_width=True):
@@ -139,13 +121,9 @@ if st.session_state.view_mode == 'list':
             st.session_state.view_mode = 'add'
             st.rerun()
 
-# =============================================================================
-# PROFILE VIEW - Business Client Profile
-# =============================================================================
 elif st.session_state.view_mode == 'profile':
     st.title('Business Client Profile')
     
-    # Search bar
     col1, col2 = st.columns([5, 1])
     with col1:
         st.text_input("Search", placeholder="🔍 Search", label_visibility="collapsed", key="profile_search")
@@ -159,7 +137,6 @@ elif st.session_state.view_mode == 'profile':
     if client and 'company_id' in client:
         st.subheader("Profile")
         
-        # Profile Details
         st.write("**Company ID**")
         st.write(client.get('company_id', 'N/A'))
         
@@ -173,16 +150,13 @@ elif st.session_state.view_mode == 'profile':
         st.write(client.get('contact_name', 'N/A'))
         
         st.write("**Address**")
-        # Format: ZIP, Street, City, State, Country
         address = f"{client.get('zip', '')}, {client.get('street', '')}, {client.get('city', '')}, {client.get('state', '')}, {client.get('country', '')}"
         st.write(address)
         
         st.divider()
         
-        # View Document Button
         st.button("View uploaded document →", use_container_width=True, disabled=True)
         
-        # Action Buttons
         col1, col2 = st.columns(2)
         with col1:
             if st.button("Remove", use_container_width=True):
@@ -196,7 +170,6 @@ elif st.session_state.view_mode == 'profile':
                 st.rerun()
         with col2:
             if st.button("Next", use_container_width=True, type="primary"):
-                # Find next client
                 current_idx = next((i for i, c in enumerate(st.session_state.business_clients) 
                                    if c.get('company_id') == client.get('company_id')), 0)
                 next_idx = (current_idx + 1) % len(st.session_state.business_clients)
@@ -208,9 +181,7 @@ elif st.session_state.view_mode == 'profile':
         st.session_state.selected_client = None
         st.rerun()
 
-# =============================================================================
-# ADD VIEW - Add Business Client
-# =============================================================================
+
 elif st.session_state.view_mode == 'add':
     st.title('Add Business Client')
     
