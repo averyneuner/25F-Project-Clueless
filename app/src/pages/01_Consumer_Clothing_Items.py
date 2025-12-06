@@ -71,9 +71,6 @@ def create_clothing_item(item_data):
         st.error(f"❌ Error")
         return None
 
-# TODO: button for editing closet items (what view should it be?)
-    # TODO: form for editing --> leads to another page w form to add new clothing item
-
 # Show appropriate sidebar links for the role of the currently logged in user
 SideBarLinks()
 
@@ -348,7 +345,7 @@ with st.sidebar:
             most_worn = max(items, key=lambda x: x['NumberofWears'])
             st.markdown("**Most Worn Item**")
             st.text(f"{most_worn['ItemName']}")
-            st.text(f"({most_worn['NumberOfWears']} wears)")
+            st.text(f"({most_worn['NumberofWears']} wears)")
 
     st.markdown("---")
     if st.button("🔄 Refresh Data"):

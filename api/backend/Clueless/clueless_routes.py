@@ -647,16 +647,13 @@ def add_closet_item(customer_id, closet_id, item_id):
         closet_row = cursor.fetchone()
         if not closet_row: 
             return jsonify({"error": "No closet found for this customer"}), 404
-        cursor.execute("SELECT MAX(ItemId) FROM CustomerClosetClothingItems")
-        res = cursor.fetchone()
-        bridge_id = (res['MAX(ItemId)'] or 400) + 1
         cursor.execute("""
             INSERT INTO CustomerClosetClothingItems (ItemID, ClothingItemID, ClosetID, NumberofWears, AvailabilityStatus)
             VALUES (%s, %s, %s, 0, TRUE)
-        """, (bridge_id, item_id, closet_id))
+        """, (item_id, closet_id))
         db.get_db().commit()
         cursor.close()
-        return jsonify({"message": "Item added to closet successfully", "ItemID": bridge_id}),201, 
+        return jsonify({"message": "Item added to closet successfully", "ItemID": item_id}),201, 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
