@@ -31,11 +31,7 @@ st.write("---")
 
 # Helpers
 def load_inventory_df(business_id: int) -> pd.DataFrame:
-    """
-    Call GET /business/business/<business_id>/inventory
-    and return a DataFrame with the raw columns from the API.
-    """
-    url = f"{API_BASE}/business/business/{business_id}/inventory"
+    url = f"{API_BASE}/business/{business_id}/inventory"
     try:
         resp = requests.get(url, timeout=5)
         resp.raise_for_status()
@@ -73,12 +69,8 @@ def add_inventory_item(
     qty_in_stock: int,
     ethically_sourced: bool,
 ):
-    """
-    Call POST /business/business/<business_id>/inventory/<inventory_id>/item/<clothing_item_id>
-    using the route defined in clueless_routes.py.
-    """
     url = (
-        f"{API_BASE}/business/business/"
+        f"{API_BASE}/business/"
         f"{business_id}/inventory/{inventory_id}/item/{clothing_item_id}"
     )
     payload = {
@@ -99,11 +91,7 @@ def add_inventory_item(
 
 
 def delete_inventory_item(business_id: int, clothing_item_id: int):
-    """
-    Call DELETE /business/business/<business_id>/inventory/<clothing_item_id>
-    which deletes rows in BusinessInventoryItemStorage for that ClothingItemID.
-    """
-    url = f"{API_BASE}/business/business/{business_id}/inventory/{clothing_item_id}"
+    url = f"{API_BASE}/business/{business_id}/inventory/{clothing_item_id}"
     try:
         resp = requests.delete(url, timeout=5)
         if resp.status_code == 200:

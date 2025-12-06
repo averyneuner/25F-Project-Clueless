@@ -19,7 +19,7 @@ def fetch_available_items(business_id: int):
     Uses: GET /business/{business_id}/inventory/available
     Returns catalog items that are NOT in the business's inventory.
     """
-    url = f"{API_BASE_URL}/business/business/{business_id}/inventory/available"
+    url = f"{API_BASE_URL}/business/{business_id}/inventory/available"
     try:
         resp = requests.get(url, timeout=5)
         resp.raise_for_status()
@@ -29,7 +29,7 @@ def fetch_available_items(business_id: int):
 
 
 def fetch_wishlist_items(business_id: int, wishlist_id: int):
-    url = f"{API_BASE_URL}/business/business/{business_id}/wishlists/{wishlist_id}"
+    url = f"{API_BASE_URL}/business/{business_id}/wishlists/{wishlist_id}"
     try:
         resp = requests.get(url, timeout=5)
 
@@ -56,7 +56,7 @@ def add_item_to_wishlist(business_id: int, wishlist_id: int, item_id: int):
     """
     Uses: POST /business/{business_id}/wishlists/{wishlist_id}/item/{item_id}
     """
-    url = f"{API_BASE_URL}/business/business/{business_id}/wishlists/{wishlist_id}/item/{item_id}"
+    url = f"{API_BASE_URL}/business/{business_id}/wishlists/{wishlist_id}/item/{item_id}"
     try:
         # API doesn't use the body, but sending an empty JSON is fine
         resp = requests.post(url, json={}, timeout=5)
@@ -75,7 +75,7 @@ def remove_item_from_wishlist(business_id: int, wishlist_id: int, item_id: int):
     """
     Uses: DELETE /business/{business_id}/wishlists/{wishlist_id}/item/{item_id}
     """
-    url = f"{API_BASE_URL}/business/business/{business_id}/wishlists/{wishlist_id}/item/{item_id}"
+    url = f"{API_BASE_URL}/business/{business_id}/wishlists/{wishlist_id}/item/{item_id}"
     try:
         resp = requests.delete(url, timeout=5)
         if resp.status_code >= 400:
