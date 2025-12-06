@@ -237,7 +237,7 @@ if wishlist_data:
     st.divider()
 
     with st.expander(" ➕ Add New Item to Wishlist"):
-        tab1, tab2 = st.tabs(["Add Existing Item", "Create New Item"])
+        tab1 = st.tabs(["Add Existing Item", "Create New Item"])
 
         # case 1: add an existing item to my wishlist (item already in db)
         with tab1:
@@ -260,55 +260,6 @@ if wishlist_data:
                     if result:
                         st.success(f"✅ Item added successfully!")
                         st.rerun()
-        
-        # case 2: add info for a new clothing item to be added to db
-        with tab2:
-            with st.form("create_new_item"):
-                st.markdown("**Create a brand new item & add it to your wishlist**")
-
-                col1, col2 = st.columns(2)
-
-                with col1:
-                    name = st.text_input("Item Name*", placeholder="e.g. Wide Leg Jeans")
-                    category = st.selectbox(
-                        "Category*",
-                        ["Top", "Pants", "Dress", "Jacket", "Shoes", "Accessory", "Skirt", "Set"]
-                    )
-                    price = st.number_input("Price*", min_value=0.0, step=0.1, format="%.2f")
-
-                with col2:
-                    size = st.text_input("Size*", placeholder="e.g. M, 32, etc")
-                    rating = st.slider("Quality Rating*", 1, 10, 7)
-                    image = st.text_input("Image Path", value="img/default.jpg")
-
-                submit_new = st.form_submit_button("Create & Add to Wishlist")
-                    
-                if submit_new:
-                    if not all([name, category, price, size, rating]):
-                        st.error("Need to fill in all required fields.")
-                    else:
-                        item_data = {
-                            "name": name,
-                            "category": category,
-                            "price": price, 
-                            "size": size,
-                            "rating": rating,
-                            "image": image
-                        }
-
-                        result = create_clothing_item(item_data)
-                        if result:
-                            new_item_id = result.get('ItemID')
-                            st.success(f"✅ Item Created! (ID: {new_item_id})")
-
-                            add_result = add_item_to_wishlist(
-                                st.session_state['customer_id'],
-                                st.session_state['wishlist_id'],
-                                new_item_id
-                            )
-                            if add_result:
-                                st.success("✅ Item added to your wishlist!")
-                                st.rerun()
 else:
     st.error("Unable to load wishlist data.")
 
