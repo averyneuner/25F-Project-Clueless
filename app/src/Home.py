@@ -59,13 +59,13 @@ if st.button("Act as Rachel Green, the general consumer.",
     logger.info("Logging in as the Consumer Persona")
     st.switch_page('pages/00_Consumer_Home.py')
 
-if st.button('Act as Mohammad, an USAID worker', 
+if st.button('Act as Alison Preistly, an data analyst', 
             type = 'primary', 
             use_container_width=True):
     st.session_state['authenticated'] = True
-    st.session_state['role'] = 'usaid_worker'
-    st.session_state['first_name'] = 'Mohammad'
-    st.switch_page('pages/10_USAID_Worker_Home.py')
+    st.session_state['role'] = 'data_analyst'
+    st.session_state['first_name'] = 'Alison'
+    st.switch_page('pages/31_Data_Analyst_Home.py')
 
 if st.button('Act as Owen, an System Administrator', 
             type = 'primary', 
