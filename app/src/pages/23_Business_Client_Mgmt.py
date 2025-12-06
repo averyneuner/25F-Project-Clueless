@@ -73,7 +73,7 @@ if st.session_state.view_mode != 'list':
 
 
 if st.session_state.view_mode == 'list':
-    st.title('Business Client Management')
+    st.title('Business Client Management Page')
     
     col1, col2 = st.columns([5, 1])
     with col1:
