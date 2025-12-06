@@ -13,7 +13,7 @@ SideBarLinks()
 API_BASE_URL = "http://web-api:4000"
 
 def get_customer_notifications(customer_id):
-    """GET /customer/customer/<id>/notifications"""
+    """GET /customer/customer/<int:customer_id>/notifications"""
     try:
         resp = requests.get(f"{API_BASE_URL}/customer/customer/{customer_id}/notifications", timeout=10)
         return (True, resp.json()) if resp.status_code == 200 else (False, resp.text)
@@ -21,7 +21,7 @@ def get_customer_notifications(customer_id):
         return False, str(e)
 
 def send_customer_notification(customer_id, message):
-    """POST /customer/customer/<id>/notifications"""
+    """POST /customer/customer/<int:customer_id>/notifications"""
     try:
         resp = requests.post(
             f"{API_BASE_URL}/customer/customer/{customer_id}/notifications",
@@ -32,7 +32,7 @@ def send_customer_notification(customer_id, message):
         return False, str(e)
 
 def get_business_notifications(business_id):
-    """GET /business/business/<id>/notifications"""
+    """GET /business/business/<int:business_id>/notifications"""
     try:
         resp = requests.get(f"{API_BASE_URL}/business/business/{business_id}/notifications", timeout=10)
         return (True, resp.json()) if resp.status_code == 200 else (False, resp.text)
@@ -40,7 +40,7 @@ def get_business_notifications(business_id):
         return False, str(e)
 
 def send_business_notification(business_id, message):
-    """POST /business/business/<id>/notifications"""
+    """POST /business/business/<int:business_id>/notifications"""
     try:
         resp = requests.post(
             f"{API_BASE_URL}/business/business/{business_id}/notifications",
@@ -51,7 +51,7 @@ def send_business_notification(business_id, message):
         return False, str(e)
 
 def delete_business_notification(business_id, notif_id):
-    """DELETE /business/business/<id>/notifications/<notif_id>"""
+    """DELETE /business/business/<int:business_id>/notifications/<int:notification_id>"""
     try:
         resp = requests.delete(f"{API_BASE_URL}/business/business/{business_id}/notifications/{notif_id}", timeout=10)
         return (True, resp.json()) if resp.status_code == 200 else (False, resp.text)
