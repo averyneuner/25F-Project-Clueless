@@ -6,7 +6,7 @@ from modules.nav import SideBarLinks
 st.set_page_config(layout= 'wide')
 
 # TODO: API Base integration
-API_BASE_URL = ""
+API_BASE_URL = "http://localhost:8501/"
 
 # TODO: button for editing closet items (what view should it be?)
     # TODO: form for editing --> leads to another page w form to add new clothing item
