@@ -15,17 +15,17 @@ API_BASE_URL = "http://web-api:4000"
 
 
 def get_admin_users():
-    """GET /general/admin/users"""
+    """GET /admin/users"""
     try:
-        resp = requests.get(f"{API_BASE_URL}/general/admin/users", timeout=10)
+        resp = requests.get(f"{API_BASE_URL}/admin/users", timeout=10)
         return (True, resp.json()) if resp.status_code == 200 else (False, resp.text)
     except Exception as e:
         return False, str(e)
 
 def get_admin_logs():
-    """GET /general/admin/logs"""
+    """GET /admin/logs"""
     try:
-        resp = requests.get(f"{API_BASE_URL}/general/admin/logs", timeout=10)
+        resp = requests.get(f"{API_BASE_URL}/admin/logs", timeout=10)
         return (True, resp.json()) if resp.status_code == 200 else (False, resp.text)
     except Exception as e:
         return False, str(e)
