@@ -14,7 +14,7 @@ showSidebarNavigation = false
 
 [theme]
 # Setting some basic config options related to the theme of the app
-base="#F8FAFC"
+base="light"
 primaryColor="#A78BFA"
 textColor="#1E293B"
 font="inter"
