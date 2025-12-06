@@ -5,7 +5,7 @@ from modules.nav import SideBarLinks
 
 st.set_page_config(layout = 'wide')
 
-API_BASE_URL = ""
+API_BASE_URL = "http://localhost:8501/"
 
 # Show appropriate sidebar links for the role of the currently logged in user
 SideBarLinks()

@@ -10,7 +10,7 @@ st.set_page_config(layout='wide')
 SideBarLinks()
 
 
-API_BASE_URL = "http://web-api:4000"
+API_BASE_URL = "http://localhost:8501/"
 
 def get_customer_notifications(customer_id):
     """GET /customer/customer/<int:customer_id>/notifications"""

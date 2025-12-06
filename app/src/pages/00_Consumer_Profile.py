@@ -1,17 +1,21 @@
 import logging
 logger = logging.getLogger(__name__)
+import requests
 import streamlit as st
 from modules.nav import SideBarLinks
 
 st.set_page_config(layout= 'wide')
 
-API_BASE_URL = ""
+API_BASE_URL = "http://localhost:8501/"
 
 # Show appropriate sidebar links for the role of the currently logged in user
 SideBarLinks()
 
-if 'user_id' not in st.session_state:
-    st.session_state['user_id'] = 'BREAK123'
+# API Calls Functions: (need to get consumer information)
+# TODO: need to write a backend query + route to get the consumer information fron db.
+
+if 'customer_id' not in st.session_state:
+    st.session_state['customer_id'] = 13
     st.session_state['first_name'] = 'Rachel'
     st.session_state['last_name'] = 'Green'
     st.session_state['email'] = 'rachel.green@example.com'

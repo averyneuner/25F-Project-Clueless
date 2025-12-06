@@ -212,7 +212,7 @@ INSERT INTO Customer (CustomerID, EmailAddress, FirstName, LastName, StreetAddre
 (10, 'olivia.r@example.com', 'Olivia', 'Rodriguez', '12 Sunset Blvd', 'Los Angeles', 'CA', '90001', 'USA'),
 (11, 'jackson.t@example.com', 'Jackson', 'Thompson', '88 Highland Park', 'Austin', 'TX', '78701', 'USA'),
 (12, 'sophie.l@example.com', 'Sophie', 'Lee', '452 Broadway', 'New York', 'NY', '10012', 'USA'),
-(13, 'aiden.k@example.com', 'Aiden', 'Kim', '900 North Michigan', 'Chicago', 'IL', '60611', 'USA'),
+(13, 'rachel.green@example.com', 'Rachel', 'Green', '18 West 11th Street', 'New York', 'NY', '10011', 'USA'),
 (14, 'isabella.m@example.com', 'Isabella', 'Martinez', '303 Peachtree St', 'Atlanta', 'GA', '30303', 'USA'),
 (15, 'mason.g@example.com', 'Mason', 'Garcia', '500 Brickell Ave', 'Miami', 'FL', '33131', 'USA'),
 (16, 'charlotte.w@example.com', 'Charlotte', 'Wilson', '77 Newbury St', 'Boston', 'MA', '02116', 'USA'),
