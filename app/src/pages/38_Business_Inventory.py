@@ -12,16 +12,13 @@ API_BASE = "http://web-api:4000"
 
 SideBarLinks()
 
-# -------------------------
 # Session defaults
-# -------------------------
 if "first_name" not in st.session_state:
     st.session_state["first_name"] = "Rebecca"
 
 if "business_name" not in st.session_state:
     st.session_state["business_name"] = "Rebecca's Vintage Closet"
 
-# Rebecca = business 1 (for now)
 if "business_id" not in st.session_state:
     st.session_state["business_id"] = 1
 
@@ -32,9 +29,7 @@ st.caption(f"All items for {st.session_state['business_name']}")
 st.write("---")
 
 
-# -------------------------
 # Helpers
-# -------------------------
 def load_inventory_df(business_id: int) -> pd.DataFrame:
     """
     Call GET /business/business/<business_id>/inventory
@@ -122,14 +117,11 @@ def delete_inventory_item(business_id: int, clothing_item_id: int):
         return False, f"Request failed: {e}"
 
 
-# -------------------------
 # Load current inventory
-# -------------------------
 inv_df = load_inventory_df(business_id)
 
-# -------------------------
+
 # Add existing ClothingItem to inventory
-# -------------------------
 with st.expander("➕ Add existing clothing item to this business's inventory"):
     st.markdown(
         "Use an **InventoryID** from the `BusinessInventory` table and a "
@@ -142,7 +134,7 @@ with st.expander("➕ Add existing clothing item to this business's inventory"):
             min_value=1,
             step=1,
             format="%d",
-            value=1001,  # set this to a real InventoryID for CompanyID = 1
+            value=1001, 
         )
         clothing_item_id_input = st.number_input(
             "ClothingItemID (from ClothingItem)",
@@ -177,15 +169,11 @@ with st.expander("➕ Add existing clothing item to this business's inventory"):
 
 st.write("---")
 
-# -------------------------
 # If no inventory rows yet
-# -------------------------
 if inv_df.empty:
     st.info("No inventory items found yet for this business.")
 else:
-    # -------------------------
     # Simple filters
-    # -------------------------
     with st.expander("Filter inventory"):
         col1, col2 = st.columns(2)
         with col1:
@@ -205,7 +193,6 @@ else:
 
     st.write("### 🗂️ Inventory Items")
 
-    # Pretty display copy for the bottom table
     display_df = filtered.rename(
         columns={
             "ItemID": "Item ID",
@@ -217,9 +204,8 @@ else:
         }
     )
 
-    # -------------------------
-    # Row-by-row display with delete buttons
-    # -------------------------
+    # Display inventory items with delete buttons
+
     st.markdown("#### Editable list")
 
     if "recently_deleted_items" not in st.session_state:
@@ -237,7 +223,6 @@ else:
         c4.write(row.get("Price", ""))
         c5.write(row.get("QuantityInStock", ""))
 
-        # 🔑 key uses row index + item ID so it's always unique
         btn_key = f"del_{idx}_{clothing_item_id}"
 
         if c6.button("🗑️", key=btn_key):
@@ -270,10 +255,9 @@ else:
 
 st.write("---")
 
-# -------------------------
-# Add back items removed this session
-# -------------------------
-st.subheader("↩️ Add back items removed **in this session**")
+# Add back items removed 
+
+st.subheader("↩️ Add back items removed")
 
 deleted_items = st.session_state.get("recently_deleted_items", [])
 
@@ -309,7 +293,7 @@ else:
             "Inventory ID to add into",
             min_value=1,
             step=1,
-            value=1001,  # set to a real InventoryID for CompanyID = 1
+            value=1001,  
             key="inv_back_id",
         )
     with col_a2:

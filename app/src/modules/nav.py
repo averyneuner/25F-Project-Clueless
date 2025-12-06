@@ -63,6 +63,9 @@ def BusinessInventoryNav():
     st.sidebar.page_link("pages/38_Business_Inventory.py", label="Inventory", icon="📦")
 def BusinessHomeNav():
     st.sidebar.page_link("pages/_36_Business_Home.py", label="Home", icon="🖥️")
+def BusinessWishlistNav():
+    st.sidebar.page_link("pages/39_Business_Wishlist.py", label="Wishlist", icon="💜")
+
 
 #### ------------------------ System Admin Role ------------------------
 def AdminPageNav():
@@ -142,6 +145,7 @@ def SideBarLinks(show_home=False):
         if st.session_state["role"] == "business_owner":
             BusinessInventoryNav()
             BusinessHomeNav()
+            BusinessWishlistNav()
 
     # Always show the About page at the bottom of the list of links
     AboutPageNav()

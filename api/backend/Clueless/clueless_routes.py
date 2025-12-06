@@ -571,6 +571,54 @@ def get_available_items_for_business(business_id):
     cursor.close()
     return jsonify(rows), 200
 
+# Resource: /business/{business id}/wishlists/{wishlist id}
+# Verb: GET
+@business.route("/business/<int:business_id>/wishlists/<int:wishlist_id>", methods=["GET"])
+def get_business_wishlist_items(business_id, wishlist_id):
+    try:
+        cursor = db.get_db().cursor()
+
+        # Check that the business exists
+        cursor.execute("SELECT * FROM Business WHERE CompanyID = %s", (business_id,))
+        if not cursor.fetchone():
+            return jsonify({"error": "business not found"}), 404
+
+        # Check that the wishlist exists for this business
+        cursor.execute(
+            """
+            SELECT * FROM BusinessWishlist 
+            WHERE CompanyID = %s AND WishlistID = %s
+            """,
+            (business_id, wishlist_id),
+        )
+        if not cursor.fetchone():
+            return jsonify({"error": "wishlist not found for this business"}), 404
+
+        # Get all clothing items in this wishlist
+        cursor.execute(
+            """
+            SELECT 
+                ci.ItemID,
+                ci.Name,
+                ci.Category,
+                ci.Price
+            FROM BusinessWishlistClothingItem bwci
+            JOIN ClothingItem ci ON bwci.ClothingItemID = ci.ItemID
+            WHERE bwci.WishlistID = %s
+            ORDER BY ci.Name
+            """,
+            (wishlist_id,),
+        )
+
+        items = cursor.fetchall()
+        cursor.close()
+        return jsonify(items), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+
 # ----------- Customer Routes -----------# 
 
 @customer.route("/customer/<int:customer_id>/notifications", methods=["POST"])
