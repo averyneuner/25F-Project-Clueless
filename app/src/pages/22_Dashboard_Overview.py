@@ -56,7 +56,6 @@ st.subheader("👥 User Management")
 if success_users and users_data:
     df = pd.DataFrame(users_data)
     st.dataframe(df, use_container_width=True, hide_index=True)
-    st.download_button("📥 Export CSV", df.to_csv(index=False), "users.csv", "text/csv")
 else:
     st.error(f"Failed to load users: {users_data}")
 
@@ -94,11 +93,3 @@ else:
 
 st.divider()
 st.caption("💡 Data refreshes on page load.")
-
-
-st.divider()
-
-st.subheader("Business Client Management")
-
-if st.button("Business Client Management", use_container_width=True, type="primary"):
-    st.switch_page("pages/23_Business_Client_Mgmt.py")

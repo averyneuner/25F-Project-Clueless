@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 st.set_page_config(layout='wide')
 SideBarLinks()
 
-API_BASE_URL = "http://web-api:4000"
+API_BASE_URL = ""
 
 
 if 'view_mode' not in st.session_state:
