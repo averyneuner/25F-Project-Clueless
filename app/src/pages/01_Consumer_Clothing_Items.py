@@ -2,6 +2,7 @@ import logging
 logger = logging.getLogger(__name__)
 import streamlit as st
 import requests
+import time
 from modules.nav import SideBarLinks
 
 st.set_page_config(layout= 'wide')
@@ -76,10 +77,15 @@ SideBarLinks()
 
 if 'customer_id' not in st.session_state:
     st.session_state['customer_id'] = 13
-    st.session_state['closet_id'] = 115
     st.session_state['first_name'] = 'Rachel'
     st.session_state['last_name'] = 'Green'
     st.session_state['email'] = 'rachel.green@example.com'
+
+if 'closet_id' not in st.session_state or st.session_state['closet_id'] is None:
+    st.warning("No closet selected. Please select a closet first!")
+    if st.button("Go Back to Closet Selection"):
+        st.switch_page("pages/00_Consumer_Closet.py")
+    st.stop()
 
 # styling w CSS:
 st.markdown(
@@ -118,7 +124,8 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.title(f"👗 {st.session_state['first_name']}'s Closet")
+closet_name = st.session_state.get('closet_name', f"Closet {st.session_state['closet_id']}")
+st.title(f"👗 {st.session_state['closet_name']}")
 st.markdown("View and manage your clothing items.")
 
 col1, col2 = st.columns([1, 5])
@@ -132,11 +139,14 @@ st.divider()
 closet_data = get_customer_closet(st.session_state['customer_id'])
 
 if closet_data:
-    items = closet_data.get('items', [])
+    all_items = closet_data.get('items', [])
+
+    # need to filter all items for consumer by closet id to get corresponding items.
+    items = [item for item in all_items if item['ClosetID'] == st.session_state['closet_id']]
 
     # case 1: when the closet is empty (no items yet)
     if not items:
-        st.info("Your closet is empty. Add some items to get started!")
+        st.info("This closet is empty. Add some items to get started!")
 
         with st.expander(" Add Your First Item", expanded= True):
             with st.form("add_first_item"):
@@ -179,6 +189,7 @@ if closet_data:
                             )
                             if add_result:
                                 st.success("🥳 Item added to your closet!")
+                                time.sleep(1.5)
                                 st.rerun()
     
     # case 2: have clothing items in your closet:
@@ -205,46 +216,49 @@ if closet_data:
                 key="availability_filter"
             )
 
-    st.divider()
+        st.divider()
 
-    filtered_items = items.copy()
+        # items needs to be a list before copying (keeping original items list intact)
+        if not isinstance(items, list):
+            items = []
+        filtered_items = items.copy()
 
-    if selected_category != "All Categories":
-        filtered_items = [item for item in filtered_items if item['Category'] == selected_category]
+        if selected_category != "All Categories":
+            filtered_items = [item for item in filtered_items if item['Category'] == selected_category]
 
-    if selected_availability == "Available Only":
-        filtered_items = [item for item in filtered_items if item['AvailabilityStatus']]
+        if selected_availability == "Available":
+            filtered_items = [item for item in filtered_items if item['AvailabilityStatus']]
 
-    elif selected_availability == "Unavailable Only":
-        filtered_items = [item for item in filtered_items if not item['AvailabilityStatus']]
+        elif selected_availability == "Unavailable":
+            filtered_items = [item for item in filtered_items if not item['AvailabilityStatus']]
 
-    if not filtered_items: 
-        st.warning("No items match your filters.")
-    else:
-        st.markdown(f"**Showing {len(filtered_items)} of {len(items)} items**")
-        cols = st.columns(3)
+        if not filtered_items: 
+            st.warning("No items match your filters.")
+        else:
+            st.markdown(f"**Showing {len(filtered_items)} of {len(items)} items**")
+            cols = st.columns(3)
 
-        for idx, item in enumerate(filtered_items):
-            with cols[idx % 3]:
-                with st.container(border=True):
-                    st.markdown(f"### {item['ItemName']}")
-                    st.markdown(
-                        f'<span class="category_badge">{item["Category"]}</span>',
-                        unsafe_allow_html=True
-                    )
+            for idx, item in enumerate(filtered_items):
+                with cols[idx % 3]:
+                    with st.container(border=True):
+                        st.markdown(f"### {item['ItemName']}")
+                        st.markdown(
+                            f'<span class="category_badge">{item["Category"]}</span>',
+                            unsafe_allow_html=True
+                        )
 
-                    st.write("")
+                        st.write("")
 
-                    # Stats to display:
-                    col_a, col_b = st.columns(2)
-                    with col_a:
-                        st.metric("Times Worn", item['NumberofWears'])
-                    with col_b:
-                        if item['AvailabilityStatus']:
-                            st.success("✅ Available")
-                        else:
-                            st.error("❎ Unavailable")
-                    st.caption(f"Closet ID: {item['ClosetID']}")
+                        # Stats to display:
+                        col_a, col_b = st.columns(2)
+                        with col_a:
+                            st.metric("Times Worn", item['NumberofWears'])
+                        with col_b:
+                            if item['AvailabilityStatus']:
+                                st.success("✅ Available")
+                            else:
+                                st.error("❎ Unavailable")
+                        st.caption(f"Closet ID: {item['ClosetID']}")
 
     st.divider()
 
@@ -271,6 +285,7 @@ if closet_data:
                     )
                     if result:
                         st.success(f"✅ Item added successfully!")
+                        time.sleep(1.5)
                         st.rerun()
         
         # case 2: add info for a new clothing item to be added to db
@@ -304,12 +319,14 @@ if closet_data:
                             "category": category,
                             "price": price, 
                             "size": size,
+                            "rating": rating,
                             "image": image
                         }
 
                         result = create_clothing_item(item_data)
                         if result:
                             new_item_id = result.get('ItemID')
+                            time.sleep(1.5)
                             st.success(f"✅ Item Created! (ID: {new_item_id})")
 
                             add_result = add_item_to_closet(
@@ -319,6 +336,7 @@ if closet_data:
                             )
                             if add_result:
                                 st.success("✅ Item added to your closet!")
+                                time.sleep(1.5)
                                 st.rerun()
 else:
     st.error("Unable to load closet data.")
@@ -327,26 +345,34 @@ else:
 with st.sidebar:
     st.markdown("---")
     st.markdown("### 📊 Quick Stats")
+    st.caption(f"Closet: {closet_name}")
 
     if closet_data and items:
-        total_items = len(items)
-        available_items = len([i for i in items if i['AvailabilityStatus']])
-        unavailable_items = total_items - available_items
-        total_wears = sum([i['NumberofWears'] for i in items])
-        categories = len(set([i['Category'] for i in items]))
-
-        st.metric("Total Items", total_items)
-        st.metric("Available", available_items)
-        st.metric("Unavailable", unavailable_items)
-        st.metric("Total Wears", total_wears)
-        st.metric("Categories", categories)
-
+        all_items = closet_data.get('items', [])
+        items = [item for item in all_items if item['ClosetID']] == st.session_state['closet_id']
+        
         if items:
-            most_worn = max(items, key=lambda x: x['NumberofWears'])
-            st.markdown("**Most Worn Item**")
-            st.text(f"{most_worn['ItemName']}")
-            st.text(f"({most_worn['NumberofWears']} wears)")
+            total_items = len(items)
+            available_items = len([i for i in items if i['AvailabilityStatus']])
+            unavailable_items = total_items - available_items
+            total_wears = sum([i['NumberofWears'] for i in items])
+            categories = len(set([i['Category'] for i in items]))
+
+            st.metric("Total Items", total_items)
+            st.metric("Available", available_items)
+            st.metric("Unavailable", unavailable_items)
+            st.metric("Total Wears", total_wears)
+            st.metric("Categories", categories)
+
+            if items:
+                most_worn = max(items, key=lambda x: x['NumberofWears'])
+                st.markdown("**Most Worn Item**")
+                st.text(f"{most_worn['ItemName']}")
+                st.text(f"({most_worn['NumberofWears']} wears)")
+        else:
+            st.info("No items in this closet yet.")
 
     st.markdown("---")
     if st.button("🔄 Refresh Data"):
+        time.sleep(1.5)
         st.rerun()

@@ -2,6 +2,7 @@ import logging
 logger = logging.getLogger(__name__)
 import streamlit as st
 import requests
+import time
 from modules.nav import SideBarLinks
 
 st.set_page_config(layout= 'wide')
@@ -46,6 +47,16 @@ def add_closet_outfit(customer_id, closet_id, outfit_id):
         return None
     except requests.exceptions.HTTPError as e:
         st.error(f"❌ Error adding item: {e.response.json().get('error', 'Unknown error')}")
+        try:
+            error_data = e.response.json()
+            error_msg = error_data.get('error', error_msg)
+        except:
+            try:
+                if e.response.text:
+                    error_msg = e.response.text[:100]
+            except:
+                pass
+        st.error(f"❌ Error adding Outfit.")
         return None
     except Exception as e:
         st.error(f"❌ Error")
@@ -69,6 +80,33 @@ def create_outfit(outfit_data):
     except Exception as e:
         st.error(f"❌ Error")
         return None
+
+# 4) delete an outfit
+def delete_outfit(outfit_id):
+    try:
+        response = requests.delete(
+            f"{API_BASE_URL}/outfits/{outfit_id}",
+            timeout=5
+        )
+        response.raise_for_status()
+        try:
+            return response.json()
+        except:
+            return {"message": "Success"}
+    except requests.exceptions.ConnectionError:
+        st.error(f"❌ Cannot connect to backend")
+        return None
+    except requests.exceptions.Timeout:
+        st.error(f"❌ Request timed out")
+        return None
+    except requests.exceptions.HTTPError as e:
+        st.error(f"❌ Error deleting outfit")
+        return None
+    except Exception as e:
+        st.error(f"❌ Unexpected Error")
+        return None
+
+
 
 # Show appropriate sidebar links for the role of the currently logged in user
 SideBarLinks()
@@ -200,54 +238,55 @@ if closet_data:
             for idx, (outfit_id, outfit_data) in enumerate(outfit_dict.items()):
                 with cols[idx % 2]:
                     with st.container(border=True):
-                        st.markdown(f"### 👔 {outfit_data['name']}")
-                        st.markdown(
-                            f'<span class="outfit-badge"> Outfit ID: {outfit_id}</span>',
-                            unsafe_allow_html=True
-                        )
+                        header_col1, header_col2 = st.columns([4, 1])
+                        with header_col1:
+                            st.markdown(f"### 👔 {outfit_data['name']}")
+                            st.markdown(
+                                f'<span class="outfit-badge"> Outfit ID: {outfit_id}</span>',
+                                unsafe_allow_html=True
+                            )
 
-                        st.write("")
-                        st.markdown("**Items in this outfit:**")
+                            st.write("")
+                            st.markdown("**Items in this outfit:**")
 
-                        if outfit_data['items']:
-                            for item in outfit_data['items']:
-                                st.markdown(f"- {item}")
-                        else:
-                            st.info("No items in this outfit yet!")
+                            if outfit_data['items']:
+                                for item in outfit_data['items']:
+                                    st.markdown(f"- {item}")
+                            else:
+                                st.info("No items in this outfit yet!")
 
-                        st.write("")
-                        st.metric("Total Items", len(outfit_data['items']))
+                            st.write("")
+                            st.metric("Total Items", len(outfit_data['items']))
+                        
+                        with header_col2:
+                            if st.button("🗑️ Delete", key=f"delete_{outfit_id}", help="Delete Outfit"):
+                                if st.session_state.get(f'confirm_delete_{outfit_id}'):
+                                    result = delete_outfit(outfit_id)
+                                    if result:
+                                        st.success("✅ Outfit deleted!")
+                                        time.sleep(1.5)
+                                        st.rerun()
+                                else:
+                                    st.session_state[f'confirm_delete_{outfit_id}'] = True
+                                    st.rerun()
+
+                        # Show confirmation warning if delete was clicked
+                        if st.session_state.get(f'confirm_delete_{outfit_id}'):
+                            st.warning("⚠️ Click delete again to confirm")
+                            if st.button("Cancel", key=f"cancel_delete_{outfit_id}"):
+                                st.session_state[f'confirm_delete_{outfit_id}'] = False
+                                time.sleep(1.5)
+                                st.rerun()
+
+
             st.divider()
             
             # add a new outfit section:
             with st.expander("➕ Add New Outfit"):
-                tab1, tab2 = st.tabs(["Add Existing Outfit", "Create New Outfit"])
-
-                # add an existing outfit that's within the database to this closet:
-                with tab1:
-                    with st.form("add_existing_outfit"):
-                        st.markdown("**Add an outfit that already exists in the database**")
-                        outfit_id = st.number_input(
-                            "Outfit ID",
-                            min_value = 1,
-                            step=1,
-                            help="Enter ID of an existing outfit"
-                        )
-
-                        submit_existing = st.form_submit_button("Add to Closet")
-                        if submit_existing:
-                            result = add_closet_outfit(
-                                st.session_state['customer_id'],
-                                st.session_state['closet_id'],
-                                outfit_id
-                            )
-                            if result:
-                                st.success(f"✅ Outfit added successfully!")
-                                st.rerun()
-
+                tab1, = st.tabs(["Create New Outfit"])
 
                 # create a new outfit
-                with tab2:
+                with tab1:
                     with st.form("create_new_outfit"):
                         st.markdown("**Create a brand new outfit & add it to your closet**")
 

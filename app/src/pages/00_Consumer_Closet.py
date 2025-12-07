@@ -152,17 +152,13 @@ if closet_data:
             st.subheader(f"📂 Currently Viewing: {current_closet_name}")
             st.caption(f"Closet ID: {st.session_state['closet_id']}")
             
-            col1, col2, col3 = st.columns(3)
+            col1, col2 = st.columns(2)
             
             with col1:
                 if st.button("👗 View Clothing Items", key="view_items_button", use_container_width=True):
                     st.switch_page("pages/01_Consumer_Clothing_Items.py")
             
             with col2:
-                if st.button("👔 View Outfits", key="view_outfits_button", use_container_width=True):
-                    st.switch_page("pages/01_Consumer_Outfits.py")
-            
-            with col3:
                 if st.button("🔄 Change Closet", key="change_closet_button", use_container_width=True):
                     st.session_state['closet_id'] = None
                     st.rerun()
@@ -170,9 +166,62 @@ if closet_data:
     else:
         st.info("👆 Select a closet above to view its contents")
 
+
+    # View Customer Outfits (outfits overview): 
+    st.divider()
+    st.subheader("💃🏻 My Outfits")
+    st.caption("Create and manage outfits consisting of items across all your closets!")
+
+    if outfits:
+        outfit_dict = {}
+        for outfit in outfits:
+            outfit_id = outfit['OutfitID']
+            if outfit_id not in outfit_dict:
+                outfit_dict[outfit_id] = {
+                    'name': outfit['OutfitName'],
+                    'items': []
+                }
+            outfit_dict[outfit_id]['items'].append(outfit['ItemName'])
+
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Total Outfits", len(outfit_dict))
+        with col2: 
+            total_items_in_outfits = sum(len(o['items']) for o in outfit_dict.values())
+            st.metric("Total Items Used", total_items_in_outfits)
+        with col3:
+            avg_items = total_items_in_outfits / len(outfit_dict) if outfit_dict else 0
+            st.metric("Avg Items/Outfit", f"{avg_items:.1f}")
+
+        st.write("")
+
+        # Preview of recent outfits
+        st.markdown("**Recent Outfits:**")
+        preview_cols = st.columns(3)
+
+        for idx, (outfit_id, outfit_data) in enumerate(list(outfit_dict.items())[:3]):
+            with preview_cols[idx]:
+                with st.container(border=True):
+                    st.markdown(f"**{outfit_data['name']}**")
+                    st.caption(f"{len(outfit_data['items'])} items")
+
+                    if outfit_data['items']:
+                        st.markdown(f"* {outfit_data['items'][0]}")
+                        if len(outfit_data['items']) > 1:
+                            st.markdown(f"**{len(outfit_data['items']) - 1} more**")
+
+        st.write()
+        if st.button("View All My Outfits", key="view_all_outfits_button", use_container_width=True):
+            st.switch_page("pages/01_Consumer_Outfits.py")
+
+    else:
+        st.info("You haven't created any outfits yet!")
+        
+        if st.button("Create Your First Outfit", key="create_first_outfit_button", use_container_width=True):
+            st.switch_page("pages/01_Consumer_Outfits.py")
+
 else:
     st.error("Unable to load closet data. Please try again later.")
-
 
 # Sidebar Stats:
 with st.sidebar:

@@ -692,15 +692,17 @@ def get_customer_closet(customer_id):
             ORDER BY ci.Category, ci.Name
         """, (customer_id,))
         items = cursor.fetchall()
+        
+        # find outfits where customer owns all of the items
         cursor.execute("""
-            SELECT o.OutfitID, o.Nickname AS OutfitName, ci.Name AS ItemName
-            FROM CustomerCloset cc
-            JOIN CustomerClosetOutfits cco ON cc.ClosetID = cco.ClosetID
-            JOIN Outfit o ON cco.OutfitID = o.OutfitID
+            SELECT DISTINCT o.OutfitID, o.Nickname AS OutfitName, ci.Name AS ItemName
+            FROM Outfit o
             JOIN CustomerOutfitsOfClothingItems coci ON o.OutfitID = coci.OutfitID
             JOIN ClothingItem ci ON coci.ClothingItemID = ci.ItemID
+            JOIN CustomerClosetClothingItems cci ON ci.ItemID = cci.ClothingItemID
+            JOIN CustomerCloset cc ON cci.ClosetID = cc.ClosetID
             WHERE cc.CustomerID = %s
-            ORDER BY o.OutfitID
+            ORDER BY o.OutfitID, ci.Name
         """, (customer_id,))
         outfits = cursor.fetchall()
         cursor.close()
@@ -717,17 +719,17 @@ def add_closet_item(customer_id, closet_id, item_id):
         if not closet_row: 
             return jsonify({"error": "No closet found for this customer"}), 404
         cursor.execute("""
-            INSERT INTO CustomerClosetClothingItems (ItemID, ClothingItemID, ClosetID, NumberofWears, AvailabilityStatus)
-            VALUES (%s, %s, %s, 0, TRUE)
+            INSERT INTO CustomerClosetClothingItems (ClothingItemID, ClosetID, NumberofWears, AvailabilityStatus)
+            VALUES (%s, %s, 0, TRUE)
         """, (item_id, closet_id))
         db.get_db().commit()
         cursor.close()
-        return jsonify({"message": "Item added to closet successfully", "ItemID": item_id}),201, 
+        return jsonify({"message": "Item added to closet successfully", "ItemID": item_id}), 201 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 @customer.route("/customer/<int:customer_id>/closets/<int:closet_id>/outfit/<int:outfit_id>", methods=["POST"])
-def add_closet_outfit(customer_id, outfit_id, closet_id):
+def add_closet_outfit(customer_id, closet_id, outfit_id):
     try:
         cursor = db.get_db().cursor()
         cursor.execute("SELECT ClosetID FROM CustomerCloset WHERE CustomerID = %s AND ClosetID = %s", (customer_id, closet_id))
@@ -743,7 +745,7 @@ def add_closet_outfit(customer_id, outfit_id, closet_id):
         """, (closet_id, outfit_id))
         db.get_db().commit()
         cursor.close()
-        return jsonify({"message": "Outfit added to closet successfully", "OutfitID": bridge_id}),201, 
+        return jsonify({"message": "Outfit added to closet successfully", "OutfitID": bridge_id}), 201 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -804,7 +806,7 @@ def add_customer_wishlist_item(customer_id, wishlist_id, item_id):
         """, (bridge_id, wishlist_id, item_id))
        db.get_db().commit()
        cursor.close()
-       return jsonify({"message": "Item added to wishlist successfully", "ItemID": bridge_id}),201, 
+       return jsonify({"message": "Item added to wishlist successfully", "ItemID": bridge_id}), 201 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     

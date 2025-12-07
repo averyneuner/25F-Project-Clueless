@@ -536,3 +536,4 @@ INSERT INTO CustomerClosetClothingItems (ClothingItemID, ClosetID, NumberofWears
 (829, 161, 12, TRUE), (830, 162, 1, TRUE), (831, 163, 7, TRUE),
 (832, 164, 20, TRUE), (833, 165, 5, TRUE), (834, 166, 9, FALSE),
 (835, 167, 2, TRUE), (836, 168, 11, TRUE), (837, 169, 6, TRUE);
+
