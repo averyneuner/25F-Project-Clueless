@@ -34,7 +34,7 @@ col1, col2 = st.columns([1, 2])
 with col1:
     st.subheader("Profile Picture")
     st.image("assets/profile_pic_placeholder.png", width=150)
-    st.write(f"Customer ID: {st.session_state.user_id}")
+    st.write(f"Customer ID: {st.session_state.customer_id}")
 
 # account details + closet stats:
 with col2:
