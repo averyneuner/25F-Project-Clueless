@@ -1,15 +1,18 @@
 import logging
+logger = logging.getLogger(__name__)
 import streamlit as st
 from modules.nav import SideBarLinks
 import requests
 
-logger = logging.getLogger(__name__)
 
 st.set_page_config(layout='wide')
 SideBarLinks()
 
+
 API_BASE_URL = ""
 
+
+st.title('Business Client Management Page')
 
 if 'view_mode' not in st.session_state:
     st.session_state.view_mode = 'list'
@@ -73,7 +76,6 @@ if st.session_state.view_mode != 'list':
 
 
 if st.session_state.view_mode == 'list':
-    st.title('Business Client Management Page')
     
     col1, col2 = st.columns([5, 1])
     with col1:

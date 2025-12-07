@@ -1,14 +1,16 @@
 import logging
+logger = logging.getLogger(__name__)
 import streamlit as st
 from modules.nav import SideBarLinks
 import requests
 
-logger = logging.getLogger(__name__)
 
 st.set_page_config(layout='wide')
 SideBarLinks()
 
+
 API_BASE_URL = "http://web-api:4000"
+
 
 def get_top_wishlisted():
     """GET /analytics/analytics/demand"""
@@ -18,6 +20,8 @@ def get_top_wishlisted():
     except:
         return False, []
 
+
+st.title('Wishlist Matching Page')
 
 if 'view' not in st.session_state:
     st.session_state.view = 'main'
@@ -42,21 +46,20 @@ def back_button():
 
 
 if st.session_state.view == 'main':
-    st.title('Wishlist Matching Page')
     st.subheader('Wishlist Overview')
     
-    if st.button("🏆 Top Wishlisted", use_container_width=True):
+    if st.button("Top Wishlisted", use_container_width=True):
         st.session_state.view = 'top'
         st.rerun()
-    if st.button("❓ Unmatched Items", use_container_width=True):
+    if st.button("Unmatched Items", use_container_width=True):
         st.session_state.view = 'unmatched'
         st.rerun()
-    if st.button("🔗 Mapping Suggestions", use_container_width=True):
+    if st.button("Mapping Suggestions", use_container_width=True):
         st.session_state.view = 'mapping'
         st.rerun()
     
     st.divider()
-    st.subheader('📊 Statistics')
+    st.subheader('Statistics')
     c1, c2 = st.columns(2)
     c1.metric("Top Wishlisted Items", len(wishlisted_data) if success else 0)
     unmatched_count = len([m for m in st.session_state.mapping_suggestions if not m['mapped']])
@@ -65,7 +68,7 @@ if st.session_state.view == 'main':
 
 elif st.session_state.view == 'top':
     back_button()
-    st.title('🏆 Top Wishlisted')
+    st.title('Top Wishlisted')
     
     if success and wishlisted_data:
         for i, item in enumerate(wishlisted_data[:10]):
@@ -78,7 +81,7 @@ elif st.session_state.view == 'top':
 
 elif st.session_state.view == 'unmatched':
     back_button()
-    st.title('❓ Unmatched Items')
+    st.title('Unmatched Items')
     
     unmatched = [m for m in st.session_state.mapping_suggestions if not m['mapped']]
     if unmatched:
@@ -92,7 +95,7 @@ elif st.session_state.view == 'unmatched':
 
 elif st.session_state.view == 'mapping':
     back_button()
-    st.title('🔗 Mapping Suggestions')
+    st.title('Mapping Suggestions')
     
     if st.session_state.mapping_history:
         if st.button("↩️ Undo Last Mapping"):

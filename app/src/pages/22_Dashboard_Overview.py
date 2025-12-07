@@ -1,11 +1,11 @@
 import logging
+logger = logging.getLogger(__name__)
 import streamlit as st
 from modules.nav import SideBarLinks
 import requests
 import pandas as pd
 import altair as alt
 
-logger = logging.getLogger(__name__)
 
 st.set_page_config(layout='wide')
 SideBarLinks()
@@ -43,8 +43,8 @@ with col1:
     total_users = len(users_data) if success_users else 0
     st.metric("👥 Total Users", total_users)
 with col2:
-    biz_logs = len(logs_data.get('business_logs', [])) if success_logs else 0
-    st.metric("🏢 Business Logs", biz_logs)
+    busi_logs = len(logs_data.get('business_logs', [])) if success_logs else 0
+    st.metric("🏢 Business Logs", busi_logs)
 with col3:
     tech_logs = len(logs_data.get('tech_logs', [])) if success_logs else 0
     st.metric("👨‍💻 Tech Logs", tech_logs)
@@ -52,7 +52,7 @@ with col3:
 st.divider()
 
 
-st.subheader("👥 User Management")
+st.subheader("User Management")
 if success_users and users_data:
     df = pd.DataFrame(users_data)
     st.dataframe(df, use_container_width=True, hide_index=True)
@@ -62,15 +62,15 @@ else:
 st.divider()
 
 
-st.subheader("📋 System Logs")
+st.subheader("System Logs")
 if success_logs:
     col1, col2 = st.columns(2)
     
     with col1:
         st.write("**🏢 Business Logs**")
-        biz_logs_list = logs_data.get('business_logs', [])
-        if biz_logs_list:
-            for i, log in enumerate(biz_logs_list):
+        busi_logs_list = logs_data.get('business_logs', [])
+        if busi_logs_list:
+            for i, log in enumerate(busi_logs_list):
                 status = log.get('BusinessStatus', 'Unknown')
                 icon = "🟢" if status == "Read" else "🔴"
                 with st.expander(f"{icon} Log {i+1} - {status}"):
