@@ -276,7 +276,8 @@ INSERT INTO Business (CompanyID, CompanyName, ContactEmail, StreetAddress, City,
 (36, 'Fendi', 'client.services.us@fendi.com', '598 Madison Ave', 'New York', 'NY', '10022', 'USA', 91.80),
 (37, 'Givenchy', 'contact@givenchy.com', '747 Madison Ave', 'New York', 'NY', '10065', 'USA', 90.50),
 (38, 'Valentino', 'customercare@valentino.com', '693 5th Ave', 'New York', 'NY', '10022', 'USA', 92.20),
-(39, 'Hermes', 'service.us@hermes.com', '691 Madison Ave', 'New York', 'NY', '10065', 'USA', 96.50);
+(39, 'Hermes', 'service.us@hermes.com', '691 Madison Ave', 'New York', 'NY', '10065', 'USA', 96.50)
+(40, 'Rebecca Boutique', 'rebecca.us@boutique.com', '809 Eleven Levels', 'New Haven', 'CT', '99882', 'USA', 88.7);
 
 INSERT INTO ClothingItem (ItemID, ImageAddress, Name, Category, Price, Size, QualityRating, OutdatedFlag, PopularityPercentage) VALUES
 (820, 'img/silkscarf.jpg', 'Vintage Silk Scarf', 'Accessory', 120.00, 'OneSize', 9, FALSE, 78.00),
