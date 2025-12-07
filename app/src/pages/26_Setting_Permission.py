@@ -1,12 +1,13 @@
 import logging
+logger = logging.getLogger(__name__)
 import streamlit as st
 from modules.nav import SideBarLinks
 import requests
 
-logger = logging.getLogger(__name__)
 
 st.set_page_config(layout='wide')
 SideBarLinks()
+
 
 API_BASE_URL = "http://web-api:4000"
 

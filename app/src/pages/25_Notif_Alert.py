@@ -1,16 +1,17 @@
 import logging
+logger = logging.getLogger(__name__)
 import streamlit as st
 from modules.nav import SideBarLinks
 import requests
 from datetime import datetime
 
-logger = logging.getLogger(__name__)
 
 st.set_page_config(layout='wide')
 SideBarLinks()
 
 
 API_BASE_URL = "http://localhost:8501/"
+
 
 def get_customer_notifications(customer_id):
     """GET /customer/customer/<int:customer_id>/notifications"""
@@ -70,26 +71,25 @@ def get_admin_users():
 customer_id = 10
 business_id = 10
 success_cust, cust_notifs = get_customer_notifications(customer_id)
-success_biz, biz_notifs = get_business_notifications(business_id)
+success_busi, busi_notifs = get_business_notifications(business_id)
 _, users_data = get_admin_users()
 
 
 st.title("Notifications & Alerts Page")
 
 
-
 col1, col2 = st.columns(2)
 with col1:
     unread_cust = sum(1 for n in (cust_notifs or []) if n.get('Status') == 'Unread') if success_cust else 0
-    st.metric("👤 Customer Unread", unread_cust)
+    st.metric("Customer Unread", unread_cust)
 with col2:
-    unread_biz = sum(1 for n in (biz_notifs or []) if n.get('Status') == 'Unread') if success_biz else 0
-    st.metric("🏢 Business Unread", unread_biz)
+    unread_busi = sum(1 for n in (busi_notifs or []) if n.get('Status') == 'Unread') if success_busi else 0
+    st.metric("Business Unread", unread_busi)
 
 st.divider()
 
 
-st.subheader("📤 Send Notification")
+st.subheader("Send Notification")
 
 notif_type = st.radio("Send to:", ["👤 Customer", "🏢 Business"], horizontal=True)
 
@@ -103,12 +103,12 @@ with col1:
         else:
             recipient_id = st.number_input("Customer ID", min_value=1, value=customer_id, key="send_cust")
     else:
-        recipient_id = st.number_input("Business ID", min_value=1, value=business_id, key="send_biz")
+        recipient_id = st.number_input("Business ID", min_value=1, value=business_id, key="send_busi")
 
 with col2:
     message = st.text_area("Message", placeholder="Type message...", height=100)
 
-if st.button("📨 Send", type="primary", disabled=not message.strip()):
+if st.button("Send", type="primary", disabled=not message.strip()):
     if "Customer" in notif_type:
         success, result = send_customer_notification(recipient_id, message.strip())
     else:
@@ -143,8 +143,8 @@ with tab1:
         st.info("No customer notifications")
 
 with tab2:
-    if success_biz and biz_notifs:
-        for notif in biz_notifs:
+    if success_busi and busi_notifs:
+        for notif in busi_notifs:
             status = notif.get('Status', 'Unknown')
             icon = "🔴" if status == "Unread" else "⚪"
             with st.container(border=True):
