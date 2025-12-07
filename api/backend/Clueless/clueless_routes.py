@@ -759,7 +759,7 @@ def get_customer_wishlist(customer_id):
             return jsonify({"error": "customer not found"}), 404
         #query 
         cursor.execute("""
-            SELECT cw.WishlistID, ci.Name, ci.Price, ci.ImageAddress
+            SELECT cw.WishlistID, ci.ItemID, ci.Name, ci.Price, ci.ImageAddress
             FROM CustomerWishlist cw
             JOIN CustWishListClothingItem cwci ON cw.WishlistID = cwci.WishlistID
             JOIN ClothingItem ci ON cwci.ClothingItemID = ci.ItemID

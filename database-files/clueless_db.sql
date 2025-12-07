@@ -537,3 +537,9 @@ INSERT INTO CustomerClosetClothingItems (ClothingItemID, ClosetID, NumberofWears
 (832, 164, 20, TRUE), (833, 165, 5, TRUE), (834, 166, 9, FALSE),
 (835, 167, 2, TRUE), (836, 168, 11, TRUE), (837, 169, 6, TRUE);
 
+-- Add some items to Rachel Green's wishlist (WishlistID 212)
+INSERT INTO CustWishListClothingItem (ItemID, WishlistID, ClothingItemID) VALUES
+(1, 212, 820), -- Vintage Silk Scarf
+(2, 212, 843), -- Knee High Boots
+(3, 212, 829), -- Pleated Tennis Skirt
+(4, 212, 844); -- Baguette Bag
