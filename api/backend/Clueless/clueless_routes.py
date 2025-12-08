@@ -810,3 +810,32 @@ def add_customer_wishlist_item(customer_id, wishlist_id, item_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
+@general.route("/businesses", methods=["GET"])
+def get_all_businesses():
+    try:
+        cursor = db.get_db().cursor()
+        cursor.execute("SELECT * FROM Business ORDER BY CompanyName")
+        businesses = cursor.fetchall()
+        cursor.close()
+        return jsonify(businesses), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@general.route("/businesses", methods=["POST"])
+def create_business():
+    try:
+        data = request.get_json()
+        cursor = db.get_db().cursor()
+        cursor.execute("SELECT MAX(CompanyID) FROM Business")
+        res = cursor.fetchone()
+        new_id = (res['MAX(CompanyID)'] or 40) + 1
+        
+        cursor.execute("""
+            INSERT INTO Business (CompanyID, CompanyName, ContactEmail, StreetAddress, City, State, ZIP, Country, PopularityPercentage)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 0.00)
+        """, (new_id, data["company_name"], data["contact_email"], data.get("street",""), data.get("city",""), data.get("state",""), data.get("zip",""), data.get("country","USA")))
+        db.get_db().commit()
+        cursor.close()
+        return jsonify({"message": "Business created", "CompanyID": new_id}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
