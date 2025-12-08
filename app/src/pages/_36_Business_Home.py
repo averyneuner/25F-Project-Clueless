@@ -12,10 +12,9 @@ API_BASE = "http://web-api:4000"
 
 SideBarLinks()
 
-# Title page:
 st.header(f"Welcome back to {st.session_state['first_name']} 👋")
 
-st.write("")  # little spacing
+st.write("") 
 
 
 st.write("---")
@@ -25,7 +24,7 @@ def load_inventory_df(business_id=40):
     url = f"{API_BASE}/business/{business_id}/inventory"
     
     resp = requests.get(url, timeout=5)
-    resp.raise_for_status()  # if API is bad -> throw
+    resp.raise_for_status()  
     
     data = resp.json()
     df = pd.DataFrame(data)
@@ -72,4 +71,4 @@ else:
             hide_index=True
         )
 
-    st.caption("Tip: Use this to help determine what to restock, promote, or discount.")
+st.caption("Tip: Use this to help determine what to restock, promote, or discount.") 

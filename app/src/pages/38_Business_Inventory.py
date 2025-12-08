@@ -12,6 +12,26 @@ API_BASE = "http://web-api:4000"
 
 SideBarLinks()
 
+<<<<<<< HEAD
+=======
+# Session defaults
+if "first_name" not in st.session_state:
+    st.session_state["first_name"] = "Rebecca"
+
+if "business_name" not in st.session_state:
+    st.session_state["business_name"] = "Rebecca's Vintage Closet"
+
+if "business_id" not in st.session_state:
+    st.session_state["business_id"] = 40
+
+business_id = st.session_state["business_id"]
+
+st.title("📦 Full Inventory")
+st.caption(f"All items for {st.session_state['business_name']}")
+st.write("---")
+
+
+>>>>>>> f7bf05309e72aa083d4bb223b93e934c60f4f514
 # Helpers
 def load_inventory_df(business_id: int) -> pd.DataFrame:
     url = f"{API_BASE}/business/{business_id}/inventory"

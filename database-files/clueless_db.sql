@@ -418,11 +418,10 @@ INSERT INTO BusinessWishlist (WishlistID, Nickname, CompanyID) VALUES
 (549, 'Printed', 22), (550, 'Embossed', 23),
 (551, 'Laser Cut', 24), (552, 'Knitted', 25),
 (553, 'Crocheted', 26), (554, 'Woven', 27),
-(555, 'Braided', 28), (556, 'Tufted', 29),
-(557, 'Clothes', 28), (558, 'Cute', 40);
+(555, 'Clothes', 28), (556, 'Cute', 40);
 
 INSERT INTO BusinessInventory (InventoryID, Title, CompanyID) VALUES
-(607, 'Spring 2025', 10), (608, 'Summer 2025', 11),
+(607, 'Spring 2025', 10), (608, 'Summer 2025', 40),
 (609, 'Fall 2025', 12), (610, 'Winter 2025', 13),
 (611, 'Resort 2025', 14), (612, 'Pre-Fall 2025', 15),
 (613, 'Capsule 1', 16), (614, 'Capsule 2', 17),
@@ -446,8 +445,7 @@ INSERT INTO BusinessInventory (InventoryID, Title, CompanyID) VALUES
 (649, 'Decor', 22), (650, 'Kitchen', 23),
 (651, 'Bath', 24), (652, 'Bedding', 25),
 (653, 'Lighting', 26), (654, 'Rugs', 27),
-(711, 'Clothes', 28), (656, 'Clothes', 40),
-(655, 'Furniture', 28), (657, 'Garden', 29);
+(655, 'Furniture', 28), (656, 'Garden', 29);
 
 USE Clueless;
 
@@ -546,3 +544,17 @@ INSERT INTO CustWishListClothingItem (ItemID, WishlistID, ClothingItemID) VALUES
 (2, 212, 843), -- Knee High Boots
 (3, 212, 829), -- Pleated Tennis Skirt
 (4, 212, 844); -- Baguette Bag
+
+-- Create an inventory for Rebecca’s Boutique (CompanyID = 40)
+INSERT INTO BusinessInventory (InventoryID, Title, CompanyID) VALUES
+(657, 'Rebecca Core Collection', 40);
+
+-- Add a few items into that inventory
+-- (These ClothingItemIDs already exist in your ClothingItem table: 830, 837, 826)
+
+INSERT INTO BusinessInventoryItemStorage
+    (ItemID, InventoryID, EthicallySourcedFlag, UnitsSold, QuantityInStock, ClothingItemID)
+VALUES
+    (401, 657, TRUE, 25, 50, 830),  -- Combat Boots
+    (402, 657, TRUE, 12, 30, 837),  -- High Waisted Leggings
+    (403, 657, FALSE, 5,  15, 826); -- Satin Slip Dressdocke

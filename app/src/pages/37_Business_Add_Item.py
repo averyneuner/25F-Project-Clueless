@@ -6,10 +6,8 @@ from modules.nav import SideBarLinks
 
 st.set_page_config(layout='wide')
 
-# Sidebar links
 SideBarLinks()
 
-# Use Rebecca defaults (temporary)
 if 'first_name' not in st.session_state:
     st.session_state['first_name'] = 'Rebecca'
 
@@ -22,7 +20,6 @@ st.caption(f"{st.session_state['business_name']} — Inventory Management")
 st.write("---")
 st.subheader("Item Details")
 
-# ----- Form -----
 with st.form("add_item_form", clear_on_submit=True):
     item_name = st.text_input("Item Name", placeholder="e.g., Sequined NYE Top")
     category = st.selectbox(
@@ -42,8 +39,4 @@ with st.form("add_item_form", clear_on_submit=True):
     submitted = st.form_submit_button("Save Item")
 
     if submitted:
-        # For now, show local confirmation
         st.success(f"Added: {item_name} ({category}) — {price}$.")
-
-        # Later: POST → API → add to BusinessInventoryItemStorage
-        # TODO: requests.post(API_BASE_URL + "/business/items", json={...}

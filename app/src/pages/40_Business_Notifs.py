@@ -3,7 +3,6 @@ import requests
 import pandas as pd
 from modules.nav import SideBarLinks
 
-# ---------------- PAGE SETUP ----------------
 st.set_page_config(
     page_title="Business Notifications",
     page_icon="🔔",
@@ -14,8 +13,6 @@ SideBarLinks()
 
 API_BASE = "http://web-api:4000"
 
-
-# ---------------- SESSION HELPERS ----------------
 if "first_name" not in st.session_state:
     st.session_state["first_name"] = "Guest"
 
@@ -23,14 +20,12 @@ if "role" not in st.session_state:
     st.session_state["role"] = "business_owner"
 
 if "business_id" not in st.session_state:
-    st.session_state["business_id"] = 40  # your home/login page can override this
+    st.session_state["business_id"] = 40 
 
 
 def get_business_id() -> int:
     return st.session_state.get("business_id", 40)
 
-
-# ---------------- API HELPERS ----------------
 def fetch_notifications(business_id: int):
     """
     GET /business/<business_id>/notifications
@@ -40,7 +35,6 @@ def fetch_notifications(business_id: int):
         resp = requests.get(url, timeout=5)
 
         if resp.status_code == 404:
-            # e.g. business not found
             try:
                 data = resp.json()
                 return [], data.get("error", "Business not found (404)")
@@ -93,7 +87,7 @@ def delete_notification(business_id: int, notification_id: int):
         return False, f"Request error: {e}"
 
 
-# ---------------- PAGE UI ----------------
+#actual page code
 business_id = get_business_id()
 
 st.title("Business Notifications 🔔")
@@ -101,7 +95,7 @@ st.caption(f"Business ID: `{business_id}`")
 
 left, right = st.columns([1, 2])
 
-# ----- LEFT: Create / send notification -----
+#sending notifs 
 with left:
     st.subheader("Create a notification")
 
@@ -131,7 +125,7 @@ with left:
                 else:
                     st.error(f"Could not send notification: {err}")
 
-# ----- RIGHT: List + manage notifications -----
+# manage notifs 
 with right:
     st.subheader("Existing notifications")
 
@@ -142,7 +136,6 @@ with right:
     elif not notifications:
         st.info("No notifications found for this business.")
     else:
-        # Optional table view
         df = pd.DataFrame(notifications)
         preferred_cols = [
             "NotificationID",
