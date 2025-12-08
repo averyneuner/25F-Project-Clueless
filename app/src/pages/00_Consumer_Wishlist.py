@@ -228,13 +228,12 @@ if wishlist_data:
                     st.write("")
                     
                     # Move to Closet button
-                    if st.button("➡️ Move to Closet", key=f"move_{idx}_{item['Name']}"):
-                        # Assuming the item has an ItemID or we can derive it
-                        # You may need to modify your API to return ItemID
+                    item_id = item.get('ItemID')
+                    if item_id and st.button("➡️ Move to Closet", key=f"move_{idx}_{item['Name']}"):
                         result = move_to_closet(
                             st.session_state['customer_id'],
                             st.session_state['closet_id'],
-                            item.get('ItemID', idx + 820)  # fallback to estimated ID
+                            item_id
                         )
                         if result:
                             st.success(f"✅ {item['Name']} moved to closet!")
@@ -288,7 +287,7 @@ if wishlist_data:
                     rating = st.slider("Quality Rating*", 1, 10, 7)
                     image = st.text_input("Image Path", value="img/default.jpg")
 
-                submit_new = st.form_submit_button("Create & Add to Closet")
+                submit_new = st.form_submit_button("Create & Add to Wishlist")
                     
                 if submit_new:
                     if not all([name, category, price, size, rating]):
