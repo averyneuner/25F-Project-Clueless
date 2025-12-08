@@ -331,7 +331,7 @@ INSERT INTO Aesthetic (AestheticID, Name, Description, PopularityPercent) VALUES
 INSERT INTO CustomerCloset (ClosetID, NickName, CustomerID) VALUES
 (109, 'Gym Bag', 10), (110, 'Office Fits', 10),
 (111, 'Date Night', 11), (112, 'Casual', 11),
-(113, 'Summer 2025', 12), (114, 'Winter Vault', 12),
+(113, 'Summer 2025', 12), (114, 'Winter Vault', 13),
 (115, 'Interview Clothes', 13), (116, 'Lounge', 13),
 (117, 'Party Wear', 14), (118, 'Beach Trip', 14),
 (119, 'Hiking', 15), (120, 'Daily Rotation', 15),
@@ -419,7 +419,7 @@ INSERT INTO BusinessWishlist (WishlistID, Nickname, CompanyID) VALUES
 (551, 'Laser Cut', 24), (552, 'Knitted', 25),
 (553, 'Crocheted', 26), (554, 'Woven', 27),
 (555, 'Braided', 28), (556, 'Tufted', 29),
-(555, 'Clothes', 28), (556, 'Cute', 40);
+(557, 'Clothes', 28), (558, 'Cute', 40);
 
 INSERT INTO BusinessInventory (InventoryID, Title, CompanyID) VALUES
 (607, 'Spring 2025', 10), (608, 'Summer 2025', 11),
@@ -447,7 +447,7 @@ INSERT INTO BusinessInventory (InventoryID, Title, CompanyID) VALUES
 (651, 'Bath', 24), (652, 'Bedding', 25),
 (653, 'Lighting', 26), (654, 'Rugs', 27),
 (711, 'Clothes', 28), (656, 'Clothes', 40),
-(655, 'Furniture', 28), (656, 'Garden', 29);
+(655, 'Furniture', 28), (658, 'Garden', 29);
 
 USE Clueless;
 
