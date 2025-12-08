@@ -30,14 +30,6 @@ def create_business(data):
     except Exception as e:
         return False, str(e)
 
-def delete_business(company_id):
-    """DELETE /businesses/<id>"""
-    try:
-        resp = requests.delete(f"{API_BASE_URL}/businesses/{company_id}", timeout=10)
-        return (True, resp.json()) if resp.status_code == 200 else (False, resp.text)
-    except Exception as e:
-        return False, str(e)
-
 
 if 'view_mode' not in st.session_state:
     st.session_state.view_mode = 'list'
