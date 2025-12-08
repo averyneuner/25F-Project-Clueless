@@ -810,8 +810,8 @@ def add_customer_wishlist_item(customer_id, wishlist_id, item_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-@general.route("/businesses", methods=["GET"])
-def get_all_businesses():
+@general.route("/business/users", methods=["GET"])
+def get_all_business():
     try:
         cursor = db.get_db().cursor()
         cursor.execute("SELECT * FROM Business ORDER BY CompanyName")
@@ -821,7 +821,7 @@ def get_all_businesses():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@general.route("/businesses", methods=["POST"])
+@general.route("/business/users", methods=["POST"])
 def create_business():
     try:
         data = request.get_json()
@@ -829,7 +829,6 @@ def create_business():
         cursor.execute("SELECT MAX(CompanyID) FROM Business")
         res = cursor.fetchone()
         new_id = (res['MAX(CompanyID)'] or 40) + 1
-        
         cursor.execute("""
             INSERT INTO Business (CompanyID, CompanyName, ContactEmail, StreetAddress, City, State, ZIP, Country, PopularityPercentage)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 0.00)
@@ -837,5 +836,16 @@ def create_business():
         db.get_db().commit()
         cursor.close()
         return jsonify({"message": "Business created", "CompanyID": new_id}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@general.route("/business/users/<int:company_id>", methods=["DELETE"])
+def delete_business(company_id):
+    try:
+        cursor = db.get_db().cursor()
+        cursor.execute("DELETE FROM Business WHERE CompanyID = %s", (company_id,))
+        db.get_db().commit()
+        cursor.close()
+        return jsonify({"message": "Business removed"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500

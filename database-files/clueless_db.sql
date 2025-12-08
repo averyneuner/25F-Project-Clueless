@@ -419,7 +419,7 @@ INSERT INTO BusinessWishlist (WishlistID, Nickname, CompanyID) VALUES
 (551, 'Laser Cut', 24), (552, 'Knitted', 25),
 (553, 'Crocheted', 26), (554, 'Woven', 27),
 (555, 'Braided', 28), (556, 'Tufted', 29),
-(555, 'Clothes', 28), (556, 'Cute', 40);
+(557, 'Clothes', 28), (558, 'Cute', 40);
 
 INSERT INTO BusinessInventory (InventoryID, Title, CompanyID) VALUES
 (607, 'Spring 2025', 10), (608, 'Summer 2025', 11),
@@ -447,7 +447,7 @@ INSERT INTO BusinessInventory (InventoryID, Title, CompanyID) VALUES
 (651, 'Bath', 24), (652, 'Bedding', 25),
 (653, 'Lighting', 26), (654, 'Rugs', 27),
 (711, 'Clothes', 28), (656, 'Clothes', 40),
-(655, 'Furniture', 28), (656, 'Garden', 29);
+(655, 'Furniture', 28), (657, 'Garden', 29);
 
 USE Clueless;
 
