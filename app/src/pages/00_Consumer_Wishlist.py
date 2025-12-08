@@ -1,6 +1,7 @@
 import logging
 logger = logging.getLogger(__name__)
 import streamlit as st
+import time
 import requests
 from modules.nav import SideBarLinks
 
@@ -144,6 +145,11 @@ wishlist_data = get_customer_wishlist(st.session_state['customer_id'])
 
 if wishlist_data:
     items = wishlist_data.get('wishlist', [])
+
+    for item in items:
+        if 'Price' in item:
+            item['Price'] = float(item['Price'])
+
     aesthetic_matches = wishlist_data.get('aesthetic_matches', [])
 
     # case 1: when the wishlist is empty (no items yet)
@@ -214,7 +220,7 @@ if wishlist_data:
                     st.write("")
 
                     # Stats to display:
-                    st.metric("Price", f"${item['Price']:.2f}")
+                    st.metric("Price", "$%.2f" % float(item['Price']))
                     
                     if item.get('ImageAddress'):
                         st.caption(f"Image: {item['ImageAddress']}")
@@ -232,6 +238,7 @@ if wishlist_data:
                         )
                         if result:
                             st.success(f"✅ {item['Name']} moved to closet!")
+                            time.sleep(1.5)
                             st.rerun()
 
     st.divider()
@@ -259,6 +266,7 @@ if wishlist_data:
                     )
                     if result:
                         st.success(f"✅ Item added successfully!")
+                        time.sleep(1.5)
                         st.rerun()
 
         with tab2:
@@ -336,4 +344,5 @@ with st.sidebar:
 
     st.markdown("---")
     if st.button("🔄 Refresh Data"):
+        time.sleep(1.5)
         st.rerun()

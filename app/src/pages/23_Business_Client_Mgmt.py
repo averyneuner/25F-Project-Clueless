@@ -14,19 +14,27 @@ API_BASE_URL = "http://web-api:4000"
 
 st.title('Business Client Management Page')
 
-def get_all_businesses():
-    """GET /businesses"""
+def get_all_business():
+    """GET /business/users"""
     try:
-        resp = requests.get(f"{API_BASE_URL}/businesses", timeout=10)
+        resp = requests.get(f"{API_BASE_URL}/business/users", timeout=10)
         return (True, resp.json()) if resp.status_code == 200 else (False, [])
     except:
         return False, []
 
 def create_business(data):
-    """POST /businesses"""
+    """POST /business/users"""
     try:
-        resp = requests.post(f"{API_BASE_URL}/businesses", json=data, timeout=10)
+        resp = requests.post(f"{API_BASE_URL}/business/users", json=data, timeout=10)
         return (True, resp.json()) if resp.status_code == 201 else (False, resp.text)
+    except Exception as e:
+        return False, str(e)
+
+def delete_business(company_id):
+    """DELETE /business/users/<int:company_id>"""
+    try:
+        resp = requests.delete(f"{API_BASE_URL}/business/users/{company_id}", timeout=10)
+        return (True, resp.json()) if resp.status_code == 200 else (False, resp.text)
     except Exception as e:
         return False, str(e)
 
@@ -37,7 +45,7 @@ if 'selected_client' not in st.session_state:
     st.session_state.selected_client = None
 
 
-success, businesses = get_all_businesses()
+success, businesses = get_all_business()
 
 
 if st.session_state.view_mode != 'list':
@@ -79,7 +87,6 @@ if st.session_state.view_mode == 'list':
     else:
         st.warning("No businesses found or API unavailable")
 
-# PROFILE VIEW
 elif st.session_state.view_mode == 'profile':
     st.title('Business Client Profile')
     

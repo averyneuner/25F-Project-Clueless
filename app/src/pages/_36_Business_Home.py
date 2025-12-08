@@ -71,4 +71,4 @@ else:
             hide_index=True
         )
 
-    st.caption("Tip: Use this to help determine what to restock, promote, or discount.")
+st.caption("Tip: Use this to help determine what to restock, promote, or discount.") 

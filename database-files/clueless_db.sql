@@ -331,7 +331,7 @@ INSERT INTO Aesthetic (AestheticID, Name, Description, PopularityPercent) VALUES
 INSERT INTO CustomerCloset (ClosetID, NickName, CustomerID) VALUES
 (109, 'Gym Bag', 10), (110, 'Office Fits', 10),
 (111, 'Date Night', 11), (112, 'Casual', 11),
-(113, 'Summer 2025', 12), (114, 'Winter Vault', 12),
+(113, 'Summer 2025', 12), (114, 'Winter Vault', 13),
 (115, 'Interview Clothes', 13), (116, 'Lounge', 13),
 (117, 'Party Wear', 14), (118, 'Beach Trip', 14),
 (119, 'Hiking', 15), (120, 'Daily Rotation', 15),
