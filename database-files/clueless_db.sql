@@ -447,7 +447,7 @@ INSERT INTO BusinessInventory (InventoryID, Title, CompanyID) VALUES
 (651, 'Bath', 24), (652, 'Bedding', 25),
 (653, 'Lighting', 26), (654, 'Rugs', 27),
 (711, 'Clothes', 28), (656, 'Clothes', 40),
-(655, 'Furniture', 28), (656, 'Garden', 29);
+(655, 'Furniture', 28), (657, 'Garden', 29);
 
 USE Clueless;
 
